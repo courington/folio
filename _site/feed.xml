@@ -1,53 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Chase Courington</title>
+    <title>SIMPLBREW</title>
     <description></description>
     <link>/</link>
     <atom:link href="/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sat, 10 Jan 2015 22:22:40 -0700</pubDate>
-    <lastBuildDate>Sat, 10 Jan 2015 22:22:40 -0700</lastBuildDate>
+    <pubDate>Sat, 10 Jan 2015 23:55:15 -0700</pubDate>
+    <lastBuildDate>Sat, 10 Jan 2015 23:55:15 -0700</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
-        <title>Welcome to 2015</title>
-        <description>&lt;p&gt;Strange Case of Dr Jekyll and Mr Hyde is the original title of a novella written by the Scottish author &lt;a href=&quot;&quot;&gt;Robert Louis Stevenson&lt;/a&gt; that was first published in 1886. The work is commonly known today as The Strange Case of Dr. Jekyll and Mr. Hyde, Dr. Jekyll and Mr. Hyde, or simply Jekyll &amp;amp; Hyde. It is about a London lawyer named Gabriel John Utterson who investigates strange occurrences between his old friend, Dr. Henry Jekyll, and the evil Edward Hyde.&lt;/p&gt;
+        <title>Getting Started</title>
+        <description>&lt;p&gt;Twenty fifteen. Time flies! I typically try to plan my year, personally, around my birthday, with more goal setting around that date. However the gravitas of New Years Day seems to grow with every passing year. Before you know it, we&amp;#39;re already 10 days into 2015. A good start to the new year can build momentum that can carry across the days, weeks and months.&lt;/p&gt;
 
-&lt;h2&gt;Inspiration &amp;amp; Writing&lt;/h2&gt;
+&lt;h2&gt;&amp;quot;The beginning is the most important part of the work.&amp;quot; -Plato&lt;/h2&gt;
 
-&lt;p&gt;Stevenson had long been intrigued by the idea of how personalities can affect a human and how to incorporate the interplay of good and evil into a story. While still a teenager, he developed a script for a play about Deacon Brodie, which he later reworked with the help of W. E. Henley and saw produced for the first time in 1882. In early 1884 he wrote the short story &amp;quot;Markheim&amp;quot;, which he revised in 1884 for publication in a Christmas annual. One night in late September or early October 1885, possibly while he was still revising &amp;quot;Markheim,&amp;quot; Stevenson had a dream, and upon wakening had the intuition for two or three scenes that would appear in the story. Biographer Graham Balfour quoted Stevenson&amp;#39;s wife Fanny Stevenson:&lt;/p&gt;
+&lt;p&gt;The start of a new year is a good excuse to finally get a blog going. I&amp;#39;ve written a few posts for our development blog at work, but not posted any kind of personal development blog. I found the writing about process helped with thinking through the task after completing the task. The follow on thought process has helped me in multiple ocassions to create future refactoring tasks.&lt;/p&gt;
 
-&lt;blockquote&gt;
-&lt;p&gt;&amp;quot;In the small hours of one morning, I was awakened by cries of horror from Louis. Thinking he had a nightmare, I awakened him. He said angrily: &amp;#39;Why did you wake me? I was dreaming a fine bogey tale.&amp;#39; I had awakened him at the first transformation scene.&amp;quot;&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;In hindsight, I should have set this up a long time ago. It&amp;#39;s even easier than I had thought. I have spun up small &amp;quot;blog&amp;quot; and project sites with Middleman in the past. But Jekyll and it&amp;#39;s GitHub pages integration was even simpler than setting up Middleman.&lt;/p&gt;
 
-&lt;h2&gt;Main Characters&lt;/h2&gt;
+&lt;p&gt;I look forward to writing about more, non-work, related development projects that I undertake. At this point my vision for &lt;a href=&quot;www.simplebrew.com&quot;&gt;SimplBrew.com&lt;/a&gt; is as a catalyst for personal development, an excuse to experiment with new languages, frameworks, patterns and projects. Most importantly is the space to reflect on learnings and to hopefully share a little bit of knowledge and experience.&lt;/p&gt;
 
-&lt;p&gt;The story revolves around &lt;strong&gt;8 main characters&lt;/strong&gt;:&lt;/p&gt;
+&lt;p&gt;In the spirit of sharing, here are some resources that I&amp;#39;ve found helpful to get a Jekyll blog up on GitHub pages, along with some other meta information.&lt;/p&gt;
+
+&lt;hr&gt;
+
+&lt;h2&gt;Jekyll/GitHub Pages specific&lt;/h2&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Dr. Henry Jekyll/Edward Hyde&lt;/li&gt;
-&lt;li&gt;Mr. Gabriel John Utterson&lt;/li&gt;
-&lt;li&gt;Richard Enfield&lt;/li&gt;
-&lt;li&gt;Dr. Hastie Lanyon&lt;/li&gt;
-&lt;li&gt;Mr. Poole&lt;/li&gt;
-&lt;li&gt;Inspector Newcomen&lt;/li&gt;
-&lt;li&gt;Sir Danvers Carew&lt;/li&gt;
-&lt;li&gt;Maid&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://help.github.com/categories/github-pages-basics/&quot;&gt;Github pages&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://jekyllrb.com/docs/github-pages/&quot;&gt;Jekyll documentation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://docs.vagrantup.com/v2/getting-started/up.html&quot;&gt;Vagrant documentation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://iwantmyname.com/&quot;&gt;IWantMyName dns hosting&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2&gt;Reception&lt;/h2&gt;
+&lt;hr&gt;
 
-&lt;p&gt;Strange Case of Dr Jekyll and Mr Hyde was an immediate success and is one of Stevenson&amp;#39;s best-selling works. Stage adaptations began in Boston and London and soon moved all across England and then towards his home Scotland within a year of its publication and it has gone on to inspire scores of major film and stage performances.&lt;/p&gt;
+&lt;h2&gt;Web Basics&lt;/h2&gt;
 
-&lt;p&gt;The Strange Case of Dr Jekyll and Mr Hyde was initially sold as a paperback for one shilling in the UK and one dollar in the U.S. The American publisher issued the book on 5 January 1886, four days before the first appearance of the UK edition issued by Longmans; Scribner&amp;#39;s published 3000 copies, only 1250 of them bound in cloth. Initially stores would not stock it until a review appeared in The Times, on 25 January 1886, giving it a favourable reception. Within the next six months, close to forty thousand copies were sold. The book&amp;#39;s success was probably due more to the &amp;quot;moral instincts of the public&amp;quot; than any perception of its artistic merits; it was widely read by those who never otherwise read fiction, quoted in pulpit sermons and in religious papers. By 1901 it was estimated to have sold over 250,000 copies.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https://training.github.com/kit/&quot;&gt;GitHub&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.codecademy.com/en/tracks/web&quot;&gt;HTML &amp;amp; CSS&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://www.codeschool.com/paths/javascript&quot;&gt;Javascript&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://rubykoans.com/&quot;&gt;Ruby&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr&gt;
+
+&lt;h2&gt;Tools&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.sublimetext.com/&quot;&gt;SublimeText2&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://iterm2.com/&quot;&gt;iTerm2&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://gitx.frim.nl/&quot;&gt;GitX&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr&gt;
+
+&lt;p&gt;Here&amp;#39;s to a great 2015 filled with fun projects, experiments and some learning. Feel free to reach out on &lt;a href=&quot;http://www.twitter.com/chasecourington&quot;&gt;@chasecourington&lt;/a&gt; or via &lt;a href=&quot;mailto:chase@simplbrew.com&quot;&gt;email&lt;/a&gt;&lt;br&gt;
+- Chase&lt;/p&gt;
 </description>
         <pubDate>Sat, 10 Jan 2015 05:00:00 -0700</pubDate>
-        <link>/erata/2015/01/10/welcome-to-2015.html</link>
-        <guid isPermaLink="true">/erata/2015/01/10/welcome-to-2015.html</guid>
+        <link>/jekyll,/process/2015/01/10/welcome-to-2015.html</link>
+        <guid isPermaLink="true">/jekyll,/process/2015/01/10/welcome-to-2015.html</guid>
         
         
-        <category>erata</category>
+        <category>jekyll,</category>
+        
+        <category>process</category>
         
       </item>
     
