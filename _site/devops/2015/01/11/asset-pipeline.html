@@ -11,6 +11,7 @@
 
   <!-- CSS -->
   <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
   <link rel="stylesheet" href="/css/main.css">
   <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
@@ -59,7 +60,7 @@
 
 <article>
   <div class="container">
-    <p><em>original at <a href="http://developers.mobilesystem7.com/blog/post/replacing-rails-asset-pipeline-with-grunt-bower-browserify/">developers.mobilesystem7.com</a></em> At Mobile System 7 we’re always exploring ways to improve our process. Early this summer we had some disucssion about how to better decouple the UI, 99% Javascript, from the Rails application, which primarily powers our REST api. The opportunity to address this decoupling came when we added a story to address some UI build process issues.</p>
+    <p>At Mobile System 7 we’re always exploring ways to improve our process. Early this summer we had some disucssion about how to better decouple the UI, 99% Javascript, from the Rails application, which primarily powers our REST api. The opportunity to address this decoupling came when we added a story to address some UI build process issues.</p>
 
 <p>Our UI was using combination of <a href="http://guides.rubyonrails.org/v3.2.13/asset_pipeline.html">Rails 3.x Asset Pipeline</a> and <a href="http://gruntjs.com">Grunt</a> to build the UI in development and production environments. We needed streamline this process and agreed that the UI shouldn’t rely on Rails to build assets.</p>
 
@@ -524,6 +525,8 @@ end
 <p>While we’re able to make some major strides in decoupling our UI from the rest of the Rails app there is still some work to be done. It would be good to get <a href="https://github.com/yeoman/grunt-filerev">grunt-filerev</a> and <a href="https://github.com/yeoman/grunt-usemin">grunt-usemin</a> included so we don’t have to use the Rails asset hashing for cache busting and can also remove those ugly .erb tags. We’d like to introduce Browserify more into the process to reduce the size/complexity of our <code>contrib-concat.js</code> file and grunt-contrib-concat task by using commonjs style includes into our javascripts. All in all, decoupling the UI has worked well and helped to improve our UI development process by giving us more control over the configuration.</p>
 
 <p>For questions or comments feel free to reach out <a href="https://twitter.com/chasecourington">@chasecourington</a>. Cheers!</p>
+
+<p><em>Originally posted at <a href="http://developers.mobilesystem7.com/blog/post/replacing-rails-asset-pipeline-with-grunt-bower-browserify/">developers.mobilesystem7.com</a></em> </p>
 
   </div>
 </article>

@@ -5,13 +5,13 @@
     <description></description>
     <link>/</link>
     <atom:link href="/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 04 Feb 2015 23:47:20 -0700</pubDate>
-    <lastBuildDate>Wed, 04 Feb 2015 23:47:20 -0700</lastBuildDate>
+    <pubDate>Wed, 04 Feb 2015 23:57:24 -0700</pubDate>
+    <lastBuildDate>Wed, 04 Feb 2015 23:57:24 -0700</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
         <title>Automated UI Testing with Sauce Labs, The Intern and Grunt</title>
-        <description>&lt;p&gt;&lt;em&gt;original at &lt;a href=&quot;http://developers.mobilesystem7.com/blog/post/automating-ui-tests/&quot;&gt;developer.mobilesystem7.com&lt;/a&gt;&lt;/em&gt; Manually testing your UI across multiple browsers and platforms is time consuming. Your time should be spent writing code and building UI components, not running through scenarios in Chrome 39 on Mac OSX 10.10.1, and then again on Windows 8 and then testing IE! Let alone managing your own &lt;a href=&quot;//www.seleniumhq.org&quot;&gt;Selenium&lt;/a&gt; test farm…&lt;/p&gt;
+        <description>&lt;p&gt;Manually testing your UI across multiple browsers and platforms is time consuming. Your time should be spent writing code and building UI components, not running through scenarios in Chrome 39 on Mac OSX 10.10.1, and then again on Windows 8 and then testing IE! Let alone managing your own &lt;a href=&quot;//www.seleniumhq.org&quot;&gt;Selenium&lt;/a&gt; test farm…&lt;/p&gt;
 
 &lt;p&gt;Thankfully we have tools like &lt;a href=&quot;//docs.saucelabs.com/reference/sauce-connect/&quot;&gt;Sauce Labs Connect&lt;/a&gt; and &lt;a href=&quot;//www.theintern.io&quot;&gt;The Intern&lt;/a&gt; to help conduct our tests. I’ll walk through how we’ve setup these two with &lt;a href=&quot;//www.gruntjs.com&quot;&gt;Grunt&lt;/a&gt; to test the UI in our &lt;a href=&quot;//rubyonrails.org/&quot;&gt;Rails&lt;/a&gt; app.&lt;/p&gt;
 
@@ -169,6 +169,7 @@ The &lt;a href=&quot;//github.com/theintern/intern/wiki/Configuring-Intern&quot;
 - &lt;a href=&quot;https://github.com/theintern/intern-examples&quot;&gt;Intern examples&lt;/a&gt;&lt;br /&gt;
 - &lt;a href=&quot;http://docs.seleniumhq.org/docs/index.jsp&quot;&gt;Selenium docs&lt;/a&gt;&lt;/p&gt;
 
+&lt;p&gt;&lt;em&gt;Originally posted at &lt;a href=&quot;http://developers.mobilesystem7.com/blog/post/automating-ui-tests/&quot;&gt;developer.mobilesystem7.com&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
 </description>
         <pubDate>Wed, 28 Jan 2015 00:00:00 -0700</pubDate>
         <link>/devops/2015/01/28/automating-ui-tests.html</link>
@@ -195,7 +196,7 @@ The &lt;a href=&quot;//github.com/theintern/intern/wiki/Configuring-Intern&quot;
     
       <item>
         <title>Replacing the Rails Asset Pipeline with Grunt, Bower and Browserify</title>
-        <description>&lt;p&gt;&lt;em&gt;original at &lt;a href=&quot;http://developers.mobilesystem7.com/blog/post/replacing-rails-asset-pipeline-with-grunt-bower-browserify/&quot;&gt;developers.mobilesystem7.com&lt;/a&gt;&lt;/em&gt; At Mobile System 7 we’re always exploring ways to improve our process. Early this summer we had some disucssion about how to better decouple the UI, 99% Javascript, from the Rails application, which primarily powers our REST api. The opportunity to address this decoupling came when we added a story to address some UI build process issues.&lt;/p&gt;
+        <description>&lt;p&gt;At Mobile System 7 we’re always exploring ways to improve our process. Early this summer we had some disucssion about how to better decouple the UI, 99% Javascript, from the Rails application, which primarily powers our REST api. The opportunity to address this decoupling came when we added a story to address some UI build process issues.&lt;/p&gt;
 
 &lt;p&gt;Our UI was using combination of &lt;a href=&quot;http://guides.rubyonrails.org/v3.2.13/asset_pipeline.html&quot;&gt;Rails 3.x Asset Pipeline&lt;/a&gt; and &lt;a href=&quot;http://gruntjs.com&quot;&gt;Grunt&lt;/a&gt; to build the UI in development and production environments. We needed streamline this process and agreed that the UI shouldn’t rely on Rails to build assets.&lt;/p&gt;
 
@@ -660,6 +661,8 @@ end
 &lt;p&gt;While we’re able to make some major strides in decoupling our UI from the rest of the Rails app there is still some work to be done. It would be good to get &lt;a href=&quot;https://github.com/yeoman/grunt-filerev&quot;&gt;grunt-filerev&lt;/a&gt; and &lt;a href=&quot;https://github.com/yeoman/grunt-usemin&quot;&gt;grunt-usemin&lt;/a&gt; included so we don’t have to use the Rails asset hashing for cache busting and can also remove those ugly .erb tags. We’d like to introduce Browserify more into the process to reduce the size/complexity of our &lt;code&gt;contrib-concat.js&lt;/code&gt; file and grunt-contrib-concat task by using commonjs style includes into our javascripts. All in all, decoupling the UI has worked well and helped to improve our UI development process by giving us more control over the configuration.&lt;/p&gt;
 
 &lt;p&gt;For questions or comments feel free to reach out &lt;a href=&quot;https://twitter.com/chasecourington&quot;&gt;@chasecourington&lt;/a&gt;. Cheers!&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Originally posted at &lt;a href=&quot;http://developers.mobilesystem7.com/blog/post/replacing-rails-asset-pipeline-with-grunt-bower-browserify/&quot;&gt;developers.mobilesystem7.com&lt;/a&gt;&lt;/em&gt; &lt;/p&gt;
 </description>
         <pubDate>Sun, 11 Jan 2015 00:00:00 -0700</pubDate>
         <link>/devops/2015/01/11/asset-pipeline.html</link>
