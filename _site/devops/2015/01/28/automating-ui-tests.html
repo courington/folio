@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>SIMPLBREW</title>
+  <meta name="viewport" content="width=device-width">
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+</head>
+<body>
+  <header style="background-image: url(/images/posts/getting-started.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <h1>Automated UI Testing with Sauce Labs, The Intern and Grunt</h1>
+      <ul class="meta">
+        <li>
+          <span>
+            Published
+          </span>
+          28 Jan 2015
+        </li>
+        <li>
+          <span>
+            Category
+          </span>
+          devops
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+        <li class="previous">
+          <a href="/devops/2015/01/11/asset-pipeline.html">
+            Previous
+          </a>
+        </li>
+      
+      
+    </ul>
+  </div>
+</header>
+
+<article>
+  <div class="container">
+    <p><em>original at <a href="http://developers.mobilesystem7.com/blog/post/automating-ui-tests/">developer.mobilesystem7.com</a></em> Manually testing your UI across multiple browsers and platforms is time consuming. Your time should be spent writing code and building UI components, not running through scenarios in Chrome 39 on Mac OSX 10.10.1, and then again on Windows 8 and then testing IE! Let alone managing your own <a href="//www.seleniumhq.org">Selenium</a> test farm…</p>
+
+<p>Thankfully we have tools like <a href="//docs.saucelabs.com/reference/sauce-connect/">Sauce Labs Connect</a> and <a href="//www.theintern.io">The Intern</a> to help conduct our tests. I’ll walk through how we’ve setup these two with <a href="//www.gruntjs.com">Grunt</a> to test the UI in our <a href="//rubyonrails.org/">Rails</a> app.</p>
+
+<hr />
+<p>## Setup Sauce Labs</p>
+
+<p>To get started you’ll need a <a href="//www.saucelabs.com">Sauce Labs</a> account. If you don’t have one you can <a href="//www.saucelabs.com/signup/trial">sign up</a> for a free trial. Sauce Labs frees us from setup and management of test vms. As a bonus it’s founded by the creator of Selenium, so it’s safe to assume they know what they’re doing.</p>
+
+<hr />
+<p>## Install Intern
+<a href="//www.theintern.io">Intern</a> interacts with Sauce Labs’ API and give us a framework to write functional (and unit) tests for Selenium. Intern gives us tons of flexibility and a stable backing with <a href="//www.sitepen.com">Site Pen</a> the creators of Dojo. Install to your <strong>package.json</strong> development dependencies: <code>$ npm install intern --save-d</code></p>
+
+<hr />
+<p>## Grunt and Intern<br />
+Getting Intern to work with <a href="//gruntjs.com">Grunt</a> is easy since support is <a href="//github.com/theintern/intern/wiki/Using-Intern-with-Grunt">baked into Intern</a>. We created an Intern task and wired it into our <strong>gruntfile.js</strong>:</p>
+
+<p><strong>/grunt_tasks/intern.js</strong></p>
+
+<pre><code>module.exports = function(grunt) {  
+    grunt.config.set('intern', {
+        runner: {
+            options: {
+                config: 'tests/intern/intern',
+                runType: 'runner'
+            }
+        }
+    });
+
+    grunt.loadNpmTasks('intern');
+};
+</code></pre>
+
+<p>Once we create the intern task in our <strong>/tasks/</strong> directory we can run that task from the ci with <code>$ grunt intern</code>. This will run our tests in a test runner. Our <strong>gruntfile.js</strong> might look something like:</p>
+
+<p><strong>/gruntfile.js</strong></p>
+
+<pre><code>module.exports = function (grunt) {
+
+    // Project config
+    grunt.initConfig({
+        
+        // read grunt tasks from npm
+        pkg: grunt.file.readJSON('package.json'),
+
+    });
+
+    // load grunt plugins from directory
+    grunt.loadTasks('tasks');
+
+    // package up product for production
+    grunt.registerTask('prod',
+        'Prepare project assets',
+        ['clean', 'bowercopy', 'jshint', 'modernizr', 'browserify', 'less', 'cssmin', 'concat', 'uglify', 'copy', 'imagemin', 'jasmine', 'intern', 'clean:prod']
+    );
+
+    grunt.registerTask('default', ['prod']);
+
+};
+</code></pre>
+
+<p>We run <code>$ grunt intern</code> in a <strong>“prod”</strong> task. We still use <a href="//jasmine.github.io/2.1/introduction.html">Jasmine</a> for our unit tests and for development (for now). We run UI tests when we build for a release since the the UI tests cost more (time and money).</p>
+
+<hr />
+<p>## Configure Intern<br />
+The <a href="//github.com/theintern/intern/wiki/Configuring-Intern">Intern docs</a> are pretty great and help us get going with configuration. Areas of interest to get going are:</p>
+
+<ul>
+  <li><strong>capabilities</strong> namely the <strong>screen-resolution</strong></li>
+  <li><strong>environments</strong></li>
+  <li><strong>tunnel</strong> &amp;&amp; <strong>tunnelOptions</strong> You’ll need to get a Sauce Labs access key from your account panel on the web.</li>
+  <li><strong>functionSuites</strong> This is where we point the AMD loader to our tests</li>
+</ul>
+
+<p><strong>/tests/intern.js</strong></p>
+
+<pre><code>    ...
+    capabilities: {
+        'selenium-version': '2.41.0',
+        "screen-resolution": "1280x1024"
+    },
+    ...
+
+    ...
+    environments: [
+        { browserName: 'internet explorer', version: '11', platform: 'Windows 8.1' },
+        { browserName: 'internet explorer', version: '10', platform: 'Windows 8' },
+        { browserName: 'internet explorer', version: '9', platform: 'Windows 7' },
+        { browserName: 'firefox', version: '29', platform: [ 'Windows 7' ] },
+        { browserName: 'chrome', version: '39', platform: [ 'Windows 7' ] },
+        { browserName: 'safari', version: '6', platform: 'OS X 10.8' },
+        { browserName: 'safari', version: '7', platform: 'OS X 10.9' }
+    ],
+    ...
+
+    ...
+    tunnel: 'SauceLabsTunnel',
+    tunnelOptions: {
+        username: 'sauceLabsUserName',
+        accessKey: 'sauceLabsAccessKey'
+    },
+    ...
+
+    ...
+    functionalSuites: ['tests/intern/functional/login', 'tests/intern/functional/user-subjects'],
+    ...
+});
+</code></pre>
+
+<hr />
+<p>## Write a Functional Test</p>
+
+<p>Writing functional tests with The Intern is extremely simple. Intern comes with <a href="http://chaijs.com/">Chai</a> which is a great assertion library or you can specify a different one. <a href="https://theintern.github.io/leadfoot/index.html">Leadfoot</a> has a very nice API for navigating around your remote browser with some great documentation.</p>
+
+<p>Here’s a gist of what our test looks like <a href="https://gist.github.com/courington/1c4ca6043a12432278aa">login.js</a>.</p>
+
+<p>We’re simply testing some routing for unauthorized users, user sign in, launching a modal, launching a popup inside a modal, and finally navigating to a different page inside our app.</p>
+
+<hr />
+<p>## Run the Tests</p>
+
+<p>This is now as easy as <code>$ grunt intern</code>. </p>
+
+<p>We get ci output giving you status and reporting test results back to you. You can see from the image we have 1 failure.
+<img src="/images/sauceLabs_intern_ciOutput.png" /></p>
+
+<p>We even see in your Sauce Labs browser ui that you have tests queuing up.
+<img src="/images/sauceLabs_intern_uiQueue.png" /></p>
+
+<p>We see our UI is failing on Windows 7 in IE 9.
+<img src="/images/sauceLabs_intern_uiFail.png" /></p>
+
+<p>We can go and step through the tests and view screenshots that are automatically captured along the way. (Windows 8, IE 10)
+<img src="/images/sauceLabs_intern_login.png" /></p>
+
+<hr />
+<p>## Conclusion</p>
+
+<p>Setting appropriate timeouts between actions is imperative. Sometimes tests can fail because you’re trying to assert something before it has had time to take place. I’ve set a default timeout to provide plenty of time for things to happen across the network and in the different vms.</p>
+
+<p>Initially I encountered some issues testing our Rails app, running at port 3000, via the proxy. While Intern and Sauce Labs start you at a port you specificy in your config (:9000 by default). You can use Leadfoot to navigate the remote browser to your local app server (localhost:3000) and then start your tests from there. This adds some time and complexity because you’ll need to log in to your app on the remote browser repeatedly for different suites to run if they need to be behind authentication. A little bit of a hack, maybe there’s a better way to do this, but I found this to work.</p>
+
+<p>Running functional tests can get costly in time and money. We run Jasmine unit tests as part of our Grunt development process with grunt-contrib-watch and then run a whole functional test suite with Intern and Sauce Labs pre-release. We think this process works pretty well.</p>
+
+<p>The Intern is fairly powerful in that we can also write our unit tests with it. Since we’ve already got some 300+ Jasmine unit tests we’re not jumping at the opportunity to refactor those into the Intern. However we may move that direction eventually to simplify our development and testing process.</p>
+
+<p>For questions, comments, suggestions, etc. please reach out. <a href="https://twitter.com/chasecourington">@chasecourington</a></p>
+
+<hr />
+<p>## Resources<br />
+- <a href="https://docs.saucelabs.com/reference/test-configuration/#webdriver-api">Sauce Labs webdriver api</a><br />
+- <a href="https://github.com/theintern/intern/wiki/Configuring-Intern">The Intern configuration</a><br />
+- <a href="https://theintern.github.io/leadfoot/Command.html">Leadfoot /Command</a><br />
+- <a href="http://chaijs.com/api/assert/">Chai assert</a><br />
+- <a href="https://github.com/theintern/intern/wiki/Using-Intern-with-Grunt">Grunt + Intern</a><br />
+- <a href="https://github.com/theintern/intern-examples">Intern examples</a><br />
+- <a href="http://docs.seleniumhq.org/docs/index.jsp">Selenium docs</a></p>
+
+
+  </div>
+</article>
+
+</body>
+</html>

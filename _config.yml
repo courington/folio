@@ -4,5 +4,7 @@ tagline: 'Chase Courington - UI Developer' # A brief tagline for your site
 sidebar_image: /images/cover.jpg
 
 # Build settings
-markdown: redcarpet
+markdown: kramdown
+kramdown:
+  input: GFM
 highlighter: pygments

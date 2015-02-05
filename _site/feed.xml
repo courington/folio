@@ -5,59 +5,722 @@
     <description></description>
     <link>/</link>
     <atom:link href="/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 11 Jan 2015 00:18:25 -0700</pubDate>
-    <lastBuildDate>Sun, 11 Jan 2015 00:18:25 -0700</lastBuildDate>
+    <pubDate>Wed, 04 Feb 2015 23:47:20 -0700</pubDate>
+    <lastBuildDate>Wed, 04 Feb 2015 23:47:20 -0700</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
+        <title>Automated UI Testing with Sauce Labs, The Intern and Grunt</title>
+        <description>&lt;p&gt;&lt;em&gt;original at &lt;a href=&quot;http://developers.mobilesystem7.com/blog/post/automating-ui-tests/&quot;&gt;developer.mobilesystem7.com&lt;/a&gt;&lt;/em&gt; Manually testing your UI across multiple browsers and platforms is time consuming. Your time should be spent writing code and building UI components, not running through scenarios in Chrome 39 on Mac OSX 10.10.1, and then again on Windows 8 and then testing IE! Let alone managing your own &lt;a href=&quot;//www.seleniumhq.org&quot;&gt;Selenium&lt;/a&gt; test farm…&lt;/p&gt;
+
+&lt;p&gt;Thankfully we have tools like &lt;a href=&quot;//docs.saucelabs.com/reference/sauce-connect/&quot;&gt;Sauce Labs Connect&lt;/a&gt; and &lt;a href=&quot;//www.theintern.io&quot;&gt;The Intern&lt;/a&gt; to help conduct our tests. I’ll walk through how we’ve setup these two with &lt;a href=&quot;//www.gruntjs.com&quot;&gt;Grunt&lt;/a&gt; to test the UI in our &lt;a href=&quot;//rubyonrails.org/&quot;&gt;Rails&lt;/a&gt; app.&lt;/p&gt;
+
+&lt;hr /&gt;
+&lt;p&gt;## Setup Sauce Labs&lt;/p&gt;
+
+&lt;p&gt;To get started you’ll need a &lt;a href=&quot;//www.saucelabs.com&quot;&gt;Sauce Labs&lt;/a&gt; account. If you don’t have one you can &lt;a href=&quot;//www.saucelabs.com/signup/trial&quot;&gt;sign up&lt;/a&gt; for a free trial. Sauce Labs frees us from setup and management of test vms. As a bonus it’s founded by the creator of Selenium, so it’s safe to assume they know what they’re doing.&lt;/p&gt;
+
+&lt;hr /&gt;
+&lt;p&gt;## Install Intern
+&lt;a href=&quot;//www.theintern.io&quot;&gt;Intern&lt;/a&gt; interacts with Sauce Labs’ API and give us a framework to write functional (and unit) tests for Selenium. Intern gives us tons of flexibility and a stable backing with &lt;a href=&quot;//www.sitepen.com&quot;&gt;Site Pen&lt;/a&gt; the creators of Dojo. Install to your &lt;strong&gt;package.json&lt;/strong&gt; development dependencies: &lt;code&gt;$ npm install intern --save-d&lt;/code&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+&lt;p&gt;## Grunt and Intern&lt;br /&gt;
+Getting Intern to work with &lt;a href=&quot;//gruntjs.com&quot;&gt;Grunt&lt;/a&gt; is easy since support is &lt;a href=&quot;//github.com/theintern/intern/wiki/Using-Intern-with-Grunt&quot;&gt;baked into Intern&lt;/a&gt;. We created an Intern task and wired it into our &lt;strong&gt;gruntfile.js&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;/grunt_tasks/intern.js&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;module.exports = function(grunt) {  
+    grunt.config.set(&#39;intern&#39;, {
+        runner: {
+            options: {
+                config: &#39;tests/intern/intern&#39;,
+                runType: &#39;runner&#39;
+            }
+        }
+    });
+
+    grunt.loadNpmTasks(&#39;intern&#39;);
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Once we create the intern task in our &lt;strong&gt;/tasks/&lt;/strong&gt; directory we can run that task from the ci with &lt;code&gt;$ grunt intern&lt;/code&gt;. This will run our tests in a test runner. Our &lt;strong&gt;gruntfile.js&lt;/strong&gt; might look something like:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;/gruntfile.js&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;module.exports = function (grunt) {
+
+    // Project config
+    grunt.initConfig({
+        
+        // read grunt tasks from npm
+        pkg: grunt.file.readJSON(&#39;package.json&#39;),
+
+    });
+
+    // load grunt plugins from directory
+    grunt.loadTasks(&#39;tasks&#39;);
+
+    // package up product for production
+    grunt.registerTask(&#39;prod&#39;,
+        &#39;Prepare project assets&#39;,
+        [&#39;clean&#39;, &#39;bowercopy&#39;, &#39;jshint&#39;, &#39;modernizr&#39;, &#39;browserify&#39;, &#39;less&#39;, &#39;cssmin&#39;, &#39;concat&#39;, &#39;uglify&#39;, &#39;copy&#39;, &#39;imagemin&#39;, &#39;jasmine&#39;, &#39;intern&#39;, &#39;clean:prod&#39;]
+    );
+
+    grunt.registerTask(&#39;default&#39;, [&#39;prod&#39;]);
+
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We run &lt;code&gt;$ grunt intern&lt;/code&gt; in a &lt;strong&gt;“prod”&lt;/strong&gt; task. We still use &lt;a href=&quot;//jasmine.github.io/2.1/introduction.html&quot;&gt;Jasmine&lt;/a&gt; for our unit tests and for development (for now). We run UI tests when we build for a release since the the UI tests cost more (time and money).&lt;/p&gt;
+
+&lt;hr /&gt;
+&lt;p&gt;## Configure Intern&lt;br /&gt;
+The &lt;a href=&quot;//github.com/theintern/intern/wiki/Configuring-Intern&quot;&gt;Intern docs&lt;/a&gt; are pretty great and help us get going with configuration. Areas of interest to get going are:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;capabilities&lt;/strong&gt; namely the &lt;strong&gt;screen-resolution&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;environments&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;tunnel&lt;/strong&gt; &amp;amp;&amp;amp; &lt;strong&gt;tunnelOptions&lt;/strong&gt; You’ll need to get a Sauce Labs access key from your account panel on the web.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;functionSuites&lt;/strong&gt; This is where we point the AMD loader to our tests&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;/tests/intern.js&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    ...
+    capabilities: {
+        &#39;selenium-version&#39;: &#39;2.41.0&#39;,
+        &quot;screen-resolution&quot;: &quot;1280x1024&quot;
+    },
+    ...
+
+    ...
+    environments: [
+        { browserName: &#39;internet explorer&#39;, version: &#39;11&#39;, platform: &#39;Windows 8.1&#39; },
+        { browserName: &#39;internet explorer&#39;, version: &#39;10&#39;, platform: &#39;Windows 8&#39; },
+        { browserName: &#39;internet explorer&#39;, version: &#39;9&#39;, platform: &#39;Windows 7&#39; },
+        { browserName: &#39;firefox&#39;, version: &#39;29&#39;, platform: [ &#39;Windows 7&#39; ] },
+        { browserName: &#39;chrome&#39;, version: &#39;39&#39;, platform: [ &#39;Windows 7&#39; ] },
+        { browserName: &#39;safari&#39;, version: &#39;6&#39;, platform: &#39;OS X 10.8&#39; },
+        { browserName: &#39;safari&#39;, version: &#39;7&#39;, platform: &#39;OS X 10.9&#39; }
+    ],
+    ...
+
+    ...
+    tunnel: &#39;SauceLabsTunnel&#39;,
+    tunnelOptions: {
+        username: &#39;sauceLabsUserName&#39;,
+        accessKey: &#39;sauceLabsAccessKey&#39;
+    },
+    ...
+
+    ...
+    functionalSuites: [&#39;tests/intern/functional/login&#39;, &#39;tests/intern/functional/user-subjects&#39;],
+    ...
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+&lt;p&gt;## Write a Functional Test&lt;/p&gt;
+
+&lt;p&gt;Writing functional tests with The Intern is extremely simple. Intern comes with &lt;a href=&quot;http://chaijs.com/&quot;&gt;Chai&lt;/a&gt; which is a great assertion library or you can specify a different one. &lt;a href=&quot;https://theintern.github.io/leadfoot/index.html&quot;&gt;Leadfoot&lt;/a&gt; has a very nice API for navigating around your remote browser with some great documentation.&lt;/p&gt;
+
+&lt;p&gt;Here’s a gist of what our test looks like &lt;a href=&quot;https://gist.github.com/courington/1c4ca6043a12432278aa&quot;&gt;login.js&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;We’re simply testing some routing for unauthorized users, user sign in, launching a modal, launching a popup inside a modal, and finally navigating to a different page inside our app.&lt;/p&gt;
+
+&lt;hr /&gt;
+&lt;p&gt;## Run the Tests&lt;/p&gt;
+
+&lt;p&gt;This is now as easy as &lt;code&gt;$ grunt intern&lt;/code&gt;. &lt;/p&gt;
+
+&lt;p&gt;We get ci output giving you status and reporting test results back to you. You can see from the image we have 1 failure.
+&lt;img src=&quot;/images/sauceLabs_intern_ciOutput.png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;We even see in your Sauce Labs browser ui that you have tests queuing up.
+&lt;img src=&quot;/images/sauceLabs_intern_uiQueue.png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;We see our UI is failing on Windows 7 in IE 9.
+&lt;img src=&quot;/images/sauceLabs_intern_uiFail.png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;We can go and step through the tests and view screenshots that are automatically captured along the way. (Windows 8, IE 10)
+&lt;img src=&quot;/images/sauceLabs_intern_login.png&quot; /&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+&lt;p&gt;## Conclusion&lt;/p&gt;
+
+&lt;p&gt;Setting appropriate timeouts between actions is imperative. Sometimes tests can fail because you’re trying to assert something before it has had time to take place. I’ve set a default timeout to provide plenty of time for things to happen across the network and in the different vms.&lt;/p&gt;
+
+&lt;p&gt;Initially I encountered some issues testing our Rails app, running at port 3000, via the proxy. While Intern and Sauce Labs start you at a port you specificy in your config (:9000 by default). You can use Leadfoot to navigate the remote browser to your local app server (localhost:3000) and then start your tests from there. This adds some time and complexity because you’ll need to log in to your app on the remote browser repeatedly for different suites to run if they need to be behind authentication. A little bit of a hack, maybe there’s a better way to do this, but I found this to work.&lt;/p&gt;
+
+&lt;p&gt;Running functional tests can get costly in time and money. We run Jasmine unit tests as part of our Grunt development process with grunt-contrib-watch and then run a whole functional test suite with Intern and Sauce Labs pre-release. We think this process works pretty well.&lt;/p&gt;
+
+&lt;p&gt;The Intern is fairly powerful in that we can also write our unit tests with it. Since we’ve already got some 300+ Jasmine unit tests we’re not jumping at the opportunity to refactor those into the Intern. However we may move that direction eventually to simplify our development and testing process.&lt;/p&gt;
+
+&lt;p&gt;For questions, comments, suggestions, etc. please reach out. &lt;a href=&quot;https://twitter.com/chasecourington&quot;&gt;@chasecourington&lt;/a&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+&lt;p&gt;## Resources&lt;br /&gt;
+- &lt;a href=&quot;https://docs.saucelabs.com/reference/test-configuration/#webdriver-api&quot;&gt;Sauce Labs webdriver api&lt;/a&gt;&lt;br /&gt;
+- &lt;a href=&quot;https://github.com/theintern/intern/wiki/Configuring-Intern&quot;&gt;The Intern configuration&lt;/a&gt;&lt;br /&gt;
+- &lt;a href=&quot;https://theintern.github.io/leadfoot/Command.html&quot;&gt;Leadfoot /Command&lt;/a&gt;&lt;br /&gt;
+- &lt;a href=&quot;http://chaijs.com/api/assert/&quot;&gt;Chai assert&lt;/a&gt;&lt;br /&gt;
+- &lt;a href=&quot;https://github.com/theintern/intern/wiki/Using-Intern-with-Grunt&quot;&gt;Grunt + Intern&lt;/a&gt;&lt;br /&gt;
+- &lt;a href=&quot;https://github.com/theintern/intern-examples&quot;&gt;Intern examples&lt;/a&gt;&lt;br /&gt;
+- &lt;a href=&quot;http://docs.seleniumhq.org/docs/index.jsp&quot;&gt;Selenium docs&lt;/a&gt;&lt;/p&gt;
+
+</description>
+        <pubDate>Wed, 28 Jan 2015 00:00:00 -0700</pubDate>
+        <link>/devops/2015/01/28/automating-ui-tests.html</link>
+        <guid isPermaLink="true">/devops/2015/01/28/automating-ui-tests.html</guid>
+        
+        <category>ui</category>
+        
+        <category>testing</category>
+        
+        <category>javascript</category>
+        
+        <category>selenium</category>
+        
+        <category>theintern</category>
+        
+        <category>gruntjs</category>
+        
+        <category>saucelabs</category>
+        
+        
+        <category>devops</category>
+        
+      </item>
+    
+      <item>
+        <title>Replacing the Rails Asset Pipeline with Grunt, Bower and Browserify</title>
+        <description>&lt;p&gt;&lt;em&gt;original at &lt;a href=&quot;http://developers.mobilesystem7.com/blog/post/replacing-rails-asset-pipeline-with-grunt-bower-browserify/&quot;&gt;developers.mobilesystem7.com&lt;/a&gt;&lt;/em&gt; At Mobile System 7 we’re always exploring ways to improve our process. Early this summer we had some disucssion about how to better decouple the UI, 99% Javascript, from the Rails application, which primarily powers our REST api. The opportunity to address this decoupling came when we added a story to address some UI build process issues.&lt;/p&gt;
+
+&lt;p&gt;Our UI was using combination of &lt;a href=&quot;http://guides.rubyonrails.org/v3.2.13/asset_pipeline.html&quot;&gt;Rails 3.x Asset Pipeline&lt;/a&gt; and &lt;a href=&quot;http://gruntjs.com&quot;&gt;Grunt&lt;/a&gt; to build the UI in development and production environments. We needed streamline this process and agreed that the UI shouldn’t rely on Rails to build assets.&lt;/p&gt;
+
+&lt;p&gt;The first step in replacing the asset pipeline is identifying what we’re relying on and what can we use as replacement. The objective is to decouple the UI from the Rails toolchain, maintaining benefits of the asset pipeline while improving configuration ability.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Note: Since we’re already using Grunt and have Node/NPM installed and setup I won’t be going over getting that going but you can get some help &lt;a href=&quot;https://www.joyent.com/blog/installing-node-and-npm/&quot;&gt;here&lt;/a&gt;. NPM will be initialized in your /app/assets/ directory&lt;/em&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&quot;de-activate-the-asset-pipeline&quot;&gt;De-activate the Asset Pipeline&lt;/h2&gt;
+
+&lt;p&gt;The asset pipeline allows us to specify in our &lt;code&gt;/app/assets/&lt;/code&gt; directories what javascripts, stylesheets and images to compile/minify. We’re going to replace most of this with &lt;a href=&quot;http://gruntjs.com&quot;&gt;Grunt&lt;/a&gt; tasks. Deactivating the asset pipeline is done with a simple boolean in the application configuration file.&lt;/p&gt;
+
+&lt;h4 id=&quot;configapplicationrb&quot;&gt;/config/application.rb&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;config.assets.enabled = false
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We should also update our development environment config variable that expands compiled assets for debugging since Rails isn’t handling any of the uglification/minification.&lt;/p&gt;
+
+&lt;h4 id=&quot;configenvironmentsdevelopmentrb&quot;&gt;/config/environments/development.rb&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;config.assets.debug = false
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&quot;update-the-gemfile&quot;&gt;Update the Gemfile&lt;/h2&gt;
+
+&lt;p&gt;With the asset pipeline enabled Rails automatically adds Gems to our Gemfile for certain dependencies. We have dependencies like &lt;a href=&quot;http://getbootstrap.com&quot;&gt;Bootstrap&lt;/a&gt; and &lt;a href=&quot;http://jquery.com/&quot;&gt;jQuery&lt;/a&gt; that we need for our UI but we want more control over these assets and with the asset pipeline de-activated it’s doesn’t make sense to have the Gemfile manage these assets.&lt;/p&gt;
+
+&lt;p&gt;We have an &lt;code&gt;:assets&lt;/code&gt; group in our Gemfile that we no longer need. The same gems also belong to a &lt;code&gt;:spec&lt;/code&gt; group, which is for our Javascript unit tests, but we’ll be setting those up independent of the Rails app as well. We can remove this entire block in our Gemfile as well as remove the &lt;a href=&quot;http://jasmine.github.io/&quot;&gt;Jasmine&lt;/a&gt; gem from our &lt;code&gt;:development&lt;/code&gt; group (your Gemfile may differ).&lt;/p&gt;
+
+&lt;h4 id=&quot;gemfile&quot;&gt;/Gemfile&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;...
+group :assets, :spec do
+    gem &#39;jquery-rails&#39;, &#39;2.2.1&#39;
+    gem &#39;less-rails&#39;, &#39;2.2.2&#39;
+    gem &#39;therubyrhino&#39;, &#39;2.0.2&#39;
+    gem &#39;twitter-bootstrap-rails&#39;, &#39;2.2.3&#39;
+end
+
+group :development do
+    gem &#39;jasmine&#39;, &#39;1.3.2&#39;
+end
+...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We use &lt;a href=&quot;http://jasmine.github.io/&quot;&gt;Jasmine&lt;/a&gt; for Javascript unit tests. Since these don’t rely on any part of the Rails app and we can run them independently with Grunt, we’ll be setting that up as well.&lt;/p&gt;
+
+&lt;p&gt;We’ll use &lt;a href=&quot;http://bower.io/&quot;&gt;Bower&lt;/a&gt; to replace those Gems in the &lt;code&gt;:assets&lt;/code&gt; group. Bower gives us a little more control over the configuration of where we get the assets, where we install the assets, what to call the assets, etc. We’ll setup Bower in just a little bit.&lt;/p&gt;
+
+&lt;p&gt;Once you’ve removed those gems/groups from your Gemfile, don’t forget to run &lt;code&gt;$ bundle install&lt;/code&gt; to get a fresh install of your Gemfile and restart your webserver &lt;code&gt;$ rails s&lt;/code&gt;. Your app should look pretty different now without those assets.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&quot;architecture-of-the-ui&quot;&gt;Architecture of the UI&lt;/h2&gt;
+
+&lt;p&gt;We’ll be using &lt;a href=&quot;http://nodejs.org/&quot;&gt;Node&lt;/a&gt;/&lt;a href=&quot;https://www.npmjs.org/&quot;&gt;NPM&lt;/a&gt;, &lt;a href=&quot;http://gruntjs.com&quot;&gt;Grunt&lt;/a&gt;, &lt;a href=&quot;http://bower.io/&quot;&gt;Bower&lt;/a&gt; and a litte &lt;a href=&quot;http://browserify.org/&quot;&gt;Browserify&lt;/a&gt;. Before we setup any Grunt tasks or load any Bower assets let’s get our UI architecture in the Rails app setup.&lt;/p&gt;
+
+&lt;p&gt;We’ll keep our development UI code in &lt;code&gt;/app/assets/&lt;/code&gt; just as before, we’ll add a couple of new things to make our UI a “independent Node-ish” application. The &lt;code&gt;/images/&lt;/code&gt;, &lt;code&gt;/javascripts/&lt;/code&gt; and &lt;code&gt;/stylesheets/&lt;/code&gt; should look familiar.&lt;/p&gt;
+
+&lt;p&gt;We’ll be storing vendor assets from Bower in &lt;code&gt;/vendor/assets/&lt;/code&gt;, where Rails previously stored assets managed by the Gemfile. With Bower we can configure how this directory is structured a little better than we can relying on the Gemfile.&lt;/p&gt;
+
+&lt;p&gt;In our Rails app, &lt;code&gt;/public/&lt;/code&gt; will contain the files that are served up to our application and it also includes some of the default Rails files like &lt;code&gt;404.html&lt;/code&gt;. This will be where all our compiled, concatenated, uglified/minified files will end up.&lt;/p&gt;
+
+&lt;h4 id=&quot;appassets&quot;&gt;/app/assets/&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;|-- /app/assets/
+|  |-- images/
+|  |-- javascripts/
+|  |-- stylesheets/
+|  |-- tests/
+|  |-- grunt_tasks/
+|  |-- node_modules/
+|  |-- Gruntfile.js
+|  |-- package.json
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&quot;vendorassets&quot;&gt;/vendor/assets/&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;|-- /vendor/assets/
+|   |-- fonts/
+|   |-- images/
+|   |-- javascripts/
+|   |-- stylesheets/
+|   |-- less/
+|   |-- tests/
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&quot;public&quot;&gt;/public/&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;|-- /public/
+|   |-- fonts/
+|   |-- images/
+|   |-- javascripts/
+|   |-- stylesheets/
+...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;/app/assets/images/&lt;/strong&gt;&lt;/p&gt;
+
+    &lt;p&gt;We want to optimize the contents and copy optimized images to &lt;code&gt;/public/images/&lt;/code&gt; to be served up for the application. We’ll be using: &lt;br /&gt;
+  &lt;!-- - [grunt-contrib-copy](https://github.com/gruntjs/grunt-contrib-copy) --&gt;&lt;br /&gt;
+  - &lt;a href=&quot;https://github.com/gruntjs/grunt-contrib-imagemin&quot;&gt;grunt-contrib-imagemin&lt;/a&gt;&lt;br /&gt;
+  &lt;!-- - [grunt-newer](https://github.com/tschaub/grunt-newer) --&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;/app/assets/javascripts/&lt;/strong&gt;&lt;/p&gt;
+
+    &lt;p&gt;The bulk of our UI, we organize with sub-directories for our &lt;a href=&quot;http://backbonejs.org/&quot;&gt;Backbone.js&lt;/a&gt; app and &lt;a href=&quot;http://handlebarsjs.com/&quot;&gt;Handlebars&lt;/a&gt; templates. We need to lint, pre-compile, concatenate and copy the contents &lt;code&gt;/public/javascripts/&lt;/code&gt; to be served to the application. Here we’re using:&lt;br /&gt;
+  - &lt;a href=&quot;https://github.com/gruntjs/grunt-contrib-jshint&quot;&gt;grunt-contrib-jshint&lt;/a&gt;&lt;br /&gt;
+  - &lt;a href=&quot;https://github.com/gruntjs/grunt-contrib-concat&quot;&gt;grunt-contrib-concat&lt;/a&gt;&lt;br /&gt;
+  - &lt;a href=&quot;https://github.com/jmreidy/grunt-browserify&quot;&gt;grunt-browserify&lt;/a&gt; with &lt;a href=&quot;https://github.com/epeli/node-hbsfy&quot;&gt;hbsfy&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;/app/assets/stylesheets/&lt;/strong&gt;&lt;/p&gt;
+
+    &lt;p&gt;We use &lt;a href=&quot;http://lesscss.org/&quot;&gt;LESS&lt;/a&gt; as our CSS pre-processor, you could use &lt;a href=&quot;http://sass-lang.com/&quot;&gt;SASS&lt;/a&gt; or any other option if you’d like. We chose LESS for a slight performance advantage over SASS because it uses Node instead of Ruby for compilation. In the effort to decouple from Rails, we want the pre-processor that doesn’t require another dependency outside of our Node toolchain.&lt;/p&gt;
+
+    &lt;p&gt;We want to compile our LESS files to CSS, concatenate them with any other vendor stylesheets we use and copy the resulting stylesheet to our &lt;code&gt;/public/stylesheets/&lt;/code&gt; to be served up to the application. We’ll be using:&lt;br /&gt;
+  - &lt;a href=&quot;https://github.com/gruntjs/grunt-contrib-less&quot;&gt;grunt-contrib-less&lt;/a&gt;&lt;br /&gt;
+  - &lt;a href=&quot;https://github.com/gruntjs/grunt-contrib-concat&quot;&gt;grunt-contrib-concat&lt;/a&gt;&lt;br /&gt;
+  - &lt;a href=&quot;https://github.com/gruntjs/grunt-contrib-cssmin&quot;&gt;grunt-contrib-cssmin&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;/app/assets/tests/&lt;/strong&gt;&lt;/p&gt;
+
+    &lt;p&gt;We’re moving our Javascript unit tests away from being managed by the Rails toolchain so we can have them standalone and run more easily in development. We can write our tests and easily target our &lt;code&gt;/app/assets/javascripts/&lt;/code&gt; for testing. Our tests use:&lt;br /&gt;
+  - &lt;a href=&quot;https://github.com/gruntjs/grunt-contrib-jasmine&quot;&gt;grunt-contrib-jasmine&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&quot;setting-up-node-modules&quot;&gt;Setting up Node Modules&lt;/h2&gt;
+
+&lt;p&gt;We need to initialize or update our existing &lt;code&gt;package.json&lt;/code&gt; file to tell NPM what packages to install. In our case we’ll be installing all our packages as &lt;code&gt;devDependencies&lt;/code&gt; and configuring some of the &lt;code&gt;scripts&lt;/code&gt; to automate global installs for &lt;a href=&quot;https://github.com/gruntjs/grunt-cli&quot;&gt;grunt-cli&lt;/a&gt; and &lt;a href=&quot;http://bower.io/&quot;&gt;bower&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;If you don’t have a &lt;code&gt;package.json&lt;/code&gt; then &lt;code&gt;$ cd /app/assets/&lt;/code&gt;, remember this is our “node app”, and &lt;code&gt;$ npm init&lt;/code&gt; (You need Node/NPM installed).&lt;/p&gt;
+
+&lt;p&gt;If you have a &lt;code&gt;package.json&lt;/code&gt; then make sure it’s in &lt;code&gt;/app/assets/&lt;/code&gt; and open it in your favorite text editor and add:&lt;/p&gt;
+
+&lt;h4 id=&quot;appassetspackagejson&quot;&gt;/app/assets/package.json&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;...
+&quot;scripts&quot;: {
+    &quot;pre-install&quot;: &quot;npm install -g grunt-cli bower&quot;
+},
+...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Running &lt;code&gt;$ npm install&lt;/code&gt; will now install &lt;strong&gt;grunt-cli&lt;/strong&gt; and &lt;strong&gt;bower&lt;/strong&gt; globally before installing any of your Node packages. &lt;em&gt;NPM has it’s &lt;a href=&quot;https://www.npmjs.org/doc/misc/npm-scripts.html&quot;&gt;opinion on install scripts&lt;/a&gt;, but we’ve found this to work for us and we’re not publishing this as a package, tread lightly.&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;You’ll now have &lt;code&gt;$ grunt&lt;/code&gt; and &lt;code&gt;$ bower&lt;/code&gt; commands available to you for running tasks and installing packages.&lt;/p&gt;
+
+&lt;p&gt;Now that we have those in place we need to install our &lt;code&gt;devDependencies&lt;/code&gt;, mostly all Grunt tasks. Here’s what our &lt;code&gt;devDependencies&lt;/code&gt; attribute in &lt;code&gt;package.json&lt;/code&gt; should look something like.&lt;/p&gt;
+
+&lt;h4 id=&quot;appassetspackagejson-1&quot;&gt;/app/assets/package.json&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;...
+&quot;devDependencies&quot;: {
+    &quot;grunt&quot;: &quot;^0.4.5&quot;,
+    &quot;grunt-bower-task&quot;: &quot;^0.4.0&quot;,
+    &quot;grunt-browserify&quot;: &quot;^3.0.1&quot;,
+    &quot;grunt-concurrent&quot;: &quot;^1.0.0&quot;,
+    &quot;grunt-contrib-clean&quot;: &quot;^0.6.0&quot;,
+    &quot;grunt-contrib-concat&quot;: &quot;^0.5.0&quot;,
+    &quot;grunt-contrib-connect&quot;: &quot;^0.8.0&quot;,
+    &quot;grunt-contrib-copy&quot;: &quot;^0.6.0&quot;,
+    &quot;grunt-contrib-cssmin&quot;: &quot;^0.10.0&quot;,
+    &quot;grunt-contrib-imagemin&quot;: &quot;^0.8.1&quot;,
+    &quot;grunt-contrib-jasmine&quot;: &quot;^0.8.0&quot;,
+    &quot;grunt-contrib-jshint&quot;: &quot;^0.10.0&quot;,
+    &quot;grunt-contrib-less&quot;: &quot;^0.11.4&quot;,
+    &quot;grunt-contrib-uglify&quot;: &quot;^0.6.0&quot;,
+    &quot;grunt-contrib-watch&quot;: &quot;^0.6.1&quot;,
+    &quot;grunt-modernizr&quot;: &quot;^0.6.0&quot;,
+    &quot;grunt-newer&quot;: &quot;^0.7.0&quot;,
+    &quot;grunt-open&quot;: &quot;^0.2.3&quot;,
+    &quot;handlebars&quot;: &quot;^2.0.0&quot;,
+    &quot;hbsfy&quot;: &quot;^2.2.0&quot;,
+    &quot;time-grunt&quot;: &quot;^1.0.0&quot;
+}
+...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&quot;install-bower-packages&quot;&gt;Install Bower packages&lt;/h2&gt;
+
+&lt;p&gt;Run &lt;code&gt;$ bower init&lt;/code&gt; from your &lt;code&gt;/app/assets/&lt;/code&gt; and it’ll take you through creating a &lt;code&gt;Bower.json&lt;/code&gt; file, that is a configuration file very similar to the &lt;code&gt;package.json&lt;/code&gt; to tell Bower what packages to install. We can creat/edit a &lt;code&gt;.bowerrc&lt;/code&gt; file to tell Bower where we want our &lt;code&gt;bower_components&lt;/code&gt; installed, in our case we want to install to &lt;code&gt;/vendor/assets/&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;We use &lt;a href=&quot;https://github.com/yatskevich/grunt-bower-task&quot;&gt;grunt-bower-task&lt;/a&gt; to add a Grunt task that will install our packages and give us more control over what gets installed and where. We can configure the &lt;code&gt;Bower.json&lt;/code&gt; with &lt;code&gt;exportsOverride&lt;/code&gt; to install specific packages js, css, img, font where we want…in corresponding &lt;code&gt;/vendor/assets/&lt;/code&gt; and then we use &lt;a href=&quot;https://github.com/gruntjs/grunt-contrib-copy&quot;&gt;grunt-contrib-copy&lt;/a&gt; to move files from &lt;code&gt;/vendor/&lt;/code&gt; to &lt;code&gt;/public/&lt;/code&gt; and - &lt;a href=&quot;https://github.com/gruntjs/grunt-contrib-concat&quot;&gt;grunt-contrib-concat&lt;/a&gt; to concatenate javascripts and stylesheets together and move from &lt;code&gt;/vendor/&lt;/code&gt; to &lt;code&gt;/public/&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h4 id=&quot;appassetsbowerjson&quot;&gt;/app/assets/bower.json&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;...
+&quot;dependencies&quot;: {
+    &quot;backbone&quot;: &quot;1.0.0&quot;,
+    &quot;bootstrap&quot;: &quot;2.3.2&quot;,
+    &quot;moment&quot;: &quot;2.5.0&quot;,
+    &quot;d3&quot;: &quot;~3.4.9&quot;,
+    &quot;leaflet&quot;: &quot;~0.7.3&quot;,
+    &quot;underscore&quot;: &quot;~1.6.0&quot;,
+    &quot;mustache&quot;: &quot;~0.8.2&quot;,
+    &quot;jquery-ujs&quot;: &quot;~1.0.0&quot;,
+    &quot;fontawesome&quot;: &quot;3.2.1&quot;,
+    &quot;jquery&quot;: &quot;2.0.3&quot;,
+    &quot;bootstrap-datepicker&quot;: &quot;~1.2.0&quot;,
+    &quot;jquery-Mustache&quot;: &quot;~0.2.7&quot;,
+    &quot;leaflet.markercluster&quot;: &quot;~0.4.0&quot;,
+    &quot;modernizr&quot;: &quot;~2.8.3&quot;
+},
+&quot;devDependencies&quot;: {
+    &quot;jasmine-jquery&quot;: &quot;2.0.5&quot;,
+    &quot;sinon&quot;: &quot;http://sinonjs.org/releases/sinon-1.10.3.js&quot;
+},
+&quot;exportsOverride&quot;: {
+    &quot;bootstrap&quot;: {
+      &quot;javascripts&quot;: &quot;js/*.js&quot;,
+      &quot;stylesheets&quot;: &quot;css/*.css&quot;,
+      &quot;less&quot;: &quot;less/*.less&quot;,
+      &quot;images&quot;: &quot;img/*.png&quot;
+    },
+    &quot;backbone&quot;: {
+      &quot;javascripts&quot;: &quot;backbone.js&quot;
+    },
+    &quot;d3&quot;: {
+      &quot;javascripts&quot;: &quot;d3.js&quot;
+    },
+    &quot;fontawesome&quot;: {
+      &quot;stylesheets&quot;: &quot;css/*.css&quot;,
+      &quot;less&quot;: &quot;less/*.less&quot;,
+      &quot;fonts&quot;: &quot;font/*&quot;
+    },
+    &quot;leaflet.markercluster&quot;: {
+      &quot;stylesheets&quot;: &quot;dist/*.css&quot;,
+      &quot;javascripts&quot;: &quot;dist/*.js&quot;,
+      &quot;fonts&quot;: &quot;font/*&quot;
+    },...
+...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&quot;setting-up-grunt-tasks&quot;&gt;Setting up Grunt tasks&lt;/h2&gt;
+
+&lt;p&gt;We have our &lt;code&gt;bower.json&lt;/code&gt; setup, our &lt;code&gt;package.json&lt;/code&gt; setup and finally we need to setup some Grunt tasks to work build our UI.&lt;/p&gt;
+
+&lt;p&gt;To keep our Gruntfile manageable we break up our Grunt tasks in the &lt;code&gt;/app/assets/grunt_tasks/&lt;/code&gt; and load them in commonjs style to our &lt;code&gt;/app/assets/Gruntfile.js&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;We need a task that can prep our directories/files. The prep task will be the baseline task for:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;cleaning compiled code, &lt;code&gt;/vendor/assets/&lt;/code&gt;, and &lt;code&gt;/public/&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;installing Bower assets to &lt;code&gt;/vendor/assets/&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;hinting our javascripts in &lt;code&gt;/app/assets/javascripts/&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;pre-compiling our handlebars templates &lt;/li&gt;
+  &lt;li&gt;compiling our less to css&lt;/li&gt;
+  &lt;li&gt;concatenating our javascripts, vendor assets and stylesheets&lt;/li&gt;
+  &lt;li&gt;moving assets to &lt;code&gt;/public/&lt;/code&gt; to be served&lt;/li&gt;
+  &lt;li&gt;optimizing our &lt;code&gt;/public/images/&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;running our javascript unit tests&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;appassetsgruntfilejs&quot;&gt;/app/assets/Gruntfile.js&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;module.exports = function (grunt) {
+
+    // output task timing
+    require(&#39;time-grunt&#39;)(grunt);
+
+    // Project config
+    grunt.initConfig({
+        
+        // read grunt tasks from npm
+        pkg: grunt.file.readJSON(&#39;package.json&#39;),
+        
+        // configure paths for grunt plugins
+        paths: {
+            assets: &#39;../../vendor/assets&#39;,
+            tests: &#39;tests&#39;,
+
+            src_js: &#39;javascripts&#39;, 
+            src_css: &#39;stylesheets&#39;,
+            src_img: &#39;images&#39;,
+            src_font: &#39;fonts&#39;,
+            src_json: &#39;json&#39;,
+            src_tmp: &#39;tmp&#39;,
+
+            dist_js: &#39;../../public/javascripts&#39;,
+            dist_css: &#39;../../public/stylesheets&#39;,
+            dist_img: &#39;../../public/images&#39;,
+            dist_font: &#39;../../public/fonts&#39;,
+            dist_json: &#39;../../public/json&#39;
+        }
+
+    });
+
+    // load grunt plugins from directory
+    grunt.loadTasks(&#39;grunt_tasks&#39;);
+
+    grunt.registerTask(&#39;prep&#39;,
+        &#39;Prepare project assets&#39;,
+        [&#39;clean:nuke&#39;, &#39;bower&#39;, &#39;jshint&#39;, &#39;browserify&#39;, &#39;less&#39;, &#39;concat&#39;, &#39;copy&#39;, &#39;newer:imagemin&#39;, &#39;jasmine:ci&#39;]
+    );
+
+    grunt.registerTask(&#39;dev&#39;,
+        &#39;Prepare project assets&#39;,
+        [&#39;prep&#39;, &#39;watch&#39;]
+    );
+
+    grunt.registerTask(&#39;prod&#39;,
+        &#39;Prepare project assets&#39;,
+        [&#39;prep&#39;, &#39;cssmin&#39;, &#39;uglify&#39;, &#39;clean:prod&#39;]
+    );
+
+    grunt.registerTask(&#39;default&#39;, [&#39;prep&#39;, &#39;dev&#39;, &#39;prod&#39;]);
+
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Once we configure those Grunt tasks We can run &lt;code&gt;$ grunt prep&lt;/code&gt; and watch things build. From here we have &lt;code&gt;grunt dev&lt;/code&gt; that adds a watch task in the mix to run while changes are made to files we’re watching.&lt;/p&gt;
+
+&lt;h4 id=&quot;appassetsgrunttaskscontrib-watchjs&quot;&gt;/app/assets/grunt_tasks/contrib-watch.js&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;module.exports = function (grunt) {
+
+    grunt.config.set(&#39;watch&#39;, {
+
+        scripts: {
+            files: [
+                &#39;!.grunt&#39;,
+                &#39;&amp;lt;%= paths.src_js %&amp;gt;/**/*.js&#39;,
+                &#39;&amp;lt;%= paths.src_css %&amp;gt;/less/**&#39;,
+                &#39;&amp;lt;%= paths.tests %&amp;gt;/**/*.js&#39;
+            ],
+            tasks: [&#39;newer:jshint&#39;, &#39;newer:browserify&#39;, &#39;newer:less&#39;, &#39;newer:concat&#39;, &#39;newer:copy&#39;, &#39;newer:imagemin&#39;, &#39;jasmine:ci&#39;],
+            options: {
+                interrupt: true
+            }
+        }
+
+    });
+
+    grunt.loadNpmTasks(&#39;grunt-contrib-watch&#39;);
+
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We also have a &lt;code&gt;grunt prod&lt;/code&gt; task that will run our &lt;code&gt;grunt prep&lt;/code&gt; task and then also run grunt-contrib-cssmin and grunt-contrib-uglify on our stylesheets and javascripts to minify and uglify. Then it will clean out the non-minified/uglified files from &lt;code&gt;/public/**&lt;/code&gt; so that only those minified files are served up.&lt;/p&gt;
+
+&lt;p&gt;Let’s take a look at &lt;code&gt;bower-task.js&lt;/code&gt; to install our Bower packages. Below is what we’ve got.&lt;/p&gt;
+
+&lt;h4 id=&quot;appassetsgrunttasksbower-taskjs&quot;&gt;/app/assets/grunt_tasks/bower-task.js&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;module.exports = function(grunt) {
+
+    grunt.config.set(&#39;bower&#39;, {
+
+        install: {
+            options: {
+                targetDir: &#39;&amp;lt;%= paths.assets %&amp;gt;&#39;,
+                install: true,
+                cleanTargetDir: true,  // clean the targetDir
+                cleanBowerDir: true,  // clean the bower_components dir
+                cleanup: true,  // set cleanBowerDir &amp;amp; cleanTargetDir
+                copy: true,  // copy bower_components packages to targetDir
+                layout: &#39;byType&#39;,  // format tree by component =&amp;gt; js/css/less/img
+                verbose: false,
+                bowerOptions: {
+                    forceLatest: false,  // Force latest version on conflict
+                    production: false  // Do not install project devDependencies
+                }
+            }
+        }
+
+    });
+
+    grunt.loadNpmTasks(&#39;grunt-bower-task&#39;);
+
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The other heavy lifter of our Grunt tasks is the grunt-contrib-concat task. Concat takes all our vendor files, javascripts and stylesheets, and allows us to concatenate them together in a load order so that we can serve up a single file, reducing requests and making uglification/minification easier. It also handles a lot of the moving of files from our &lt;code&gt;/app/assets/**&lt;/code&gt; to our &lt;code&gt;/public/**&lt;/code&gt; with the destination concatenated files.&lt;/p&gt;
+
+&lt;h4 id=&quot;appassetsgrunttaskscontrib-concatjs&quot;&gt;/app/assets/grunt_tasks/contrib-concat.js&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;module.exports = function (grunt) {
+
+    grunt.config.set(&#39;concat&#39;, {
+
+        options: {},
+
+        testhelpers: {
+            src: [
+                &#39;&amp;lt;%= paths.assets %&amp;gt;/test/jasmine-jquery/jasmine-jquery.js&#39;,
+                &#39;&amp;lt;%= paths.assets %&amp;gt;/test/sinon/index.js&#39;,
+            ],
+            dest: &#39;&amp;lt;%= paths.tests %&amp;gt;/sinon-jasmine-jquery.js&#39;
+        },
+
+
+        app_js: {
+            src: [
+                &#39;&amp;lt;%= paths.assets %&amp;gt;/js/modernizr/modernizr.custom.js&#39;,
+                &#39;&amp;lt;%= paths.assets %&amp;gt;/js/jquery/jquery.js&#39;,
+                &#39;&amp;lt;%= paths.assets %&amp;gt;/jquery-ujs/rails.js&#39;,
+                &#39;&amp;lt;%= paths.assets %&amp;gt;/js/bootstrap/*.js&#39;,
+                &#39;&amp;lt;%= paths.assets %&amp;gt;/bootstrap-datepicker/bootstrap-datepicker.js&#39;,
+                &#39;&amp;lt;%= paths.assets %&amp;gt;/js/d3/d3.js&#39;,
+                &#39;&amp;lt;%= paths.assets %&amp;gt;/js/underscore/underscore.js&#39;,
+                &#39;&amp;lt;%= paths.assets %&amp;gt;/js/backbone/backbone.js&#39;,
+                &#39;&amp;lt;%= paths.assets %&amp;gt;/js/mustache/mustache.js&#39;,
+                &#39;&amp;lt;%= paths.assets %&amp;gt;/js/jquery-Mustache/jquery.mustache.js&#39;,
+                &#39;&amp;lt;%= paths.assets %&amp;gt;/js/moment/moment.js&#39;,
+                &#39;&amp;lt;%= paths.assets %&amp;gt;/leaflet/leaflet.js&#39;,
+                &#39;&amp;lt;%= paths.assets %&amp;gt;/js/leaflet.markercluster/leaflet.markercluster.js&#39;,
+                &#39;&amp;lt;%= paths.src_js %&amp;gt;/vendor/bootstrap-overrides.js&#39;
+            ],
+            dest: &#39;&amp;lt;%= paths.dist_js %&amp;gt;/app.js&#39;
+        },
+
+
+        styles: {
+            src: [
+                &#39;&amp;lt;%= paths.src_css %&amp;gt;/compiled/app.css&#39;,
+                &#39;&amp;lt;%= paths.assets %&amp;gt;/bootstrap-datepicker/datepicker.css&#39;,
+                &#39;&amp;lt;%= paths.assets %&amp;gt;/leaflet/leaflet.css&#39;,
+                &#39;&amp;lt;%= paths.assets %&amp;gt;/css/leaflet.markercluster/MarkerCluster.css&#39;
+            ],
+            dest: &#39;&amp;lt;%= paths.dist_css%&amp;gt;/app.css&#39;
+        },
+...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&quot;serving-up-the-ui&quot;&gt;Serving up the UI&lt;/h2&gt;
+
+&lt;p&gt;In our Rails app we still use .erb &lt;code&gt;stylesheet_link_tag&lt;/code&gt; and &lt;code&gt;javascript_include_tag&lt;/code&gt; since they target the &lt;code&gt;/public/&lt;/code&gt; directory and automatically add a hash to aid in cache busting. Here’s an example of how we’re including styles and javascripts.&lt;/p&gt;
+
+&lt;h4 id=&quot;appviewslayoutsapplicationhtmlerb&quot;&gt;/app/views/layouts/application.html.erb&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;% if Rails.env =~ /production/ %&amp;gt;
+    &amp;lt;%= stylesheet_link_tag &quot;/stylesheets/app.min.css&quot;, media: &quot;all&quot; %&amp;gt;
+    &amp;lt;%= javascript_include_tag &quot;/javascripts/app.min.js&quot; %&amp;gt;
+&amp;lt;% else %&amp;gt;
+    &amp;lt;%= stylesheet_link_tag &quot;/stylesheets/app.css&quot;, media: &quot;all&quot; %&amp;gt;
+    &amp;lt;%= javascript_include_tag &quot;/javascripts/app.js&quot; %&amp;gt;
+&amp;lt;% end %&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;While we’re able to make some major strides in decoupling our UI from the rest of the Rails app there is still some work to be done. It would be good to get &lt;a href=&quot;https://github.com/yeoman/grunt-filerev&quot;&gt;grunt-filerev&lt;/a&gt; and &lt;a href=&quot;https://github.com/yeoman/grunt-usemin&quot;&gt;grunt-usemin&lt;/a&gt; included so we don’t have to use the Rails asset hashing for cache busting and can also remove those ugly .erb tags. We’d like to introduce Browserify more into the process to reduce the size/complexity of our &lt;code&gt;contrib-concat.js&lt;/code&gt; file and grunt-contrib-concat task by using commonjs style includes into our javascripts. All in all, decoupling the UI has worked well and helped to improve our UI development process by giving us more control over the configuration.&lt;/p&gt;
+
+&lt;p&gt;For questions or comments feel free to reach out &lt;a href=&quot;https://twitter.com/chasecourington&quot;&gt;@chasecourington&lt;/a&gt;. Cheers!&lt;/p&gt;
+</description>
+        <pubDate>Sun, 11 Jan 2015 00:00:00 -0700</pubDate>
+        <link>/devops/2015/01/11/asset-pipeline.html</link>
+        <guid isPermaLink="true">/devops/2015/01/11/asset-pipeline.html</guid>
+        
+        <category>assets</category>
+        
+        <category>build</category>
+        
+        <category>javascript</category>
+        
+        
+        <category>devops</category>
+        
+      </item>
+    
+      <item>
         <title>Getting Started</title>
-        <description>&lt;p&gt;Twenty fifteen. Time flies! I typically try to plan my year, personally, around my birthday, with more goal setting around that date. However the gravitas of New Years Day seems to grow with every passing year. Before you know it, we&amp;#39;re already 10 days into 2015. A good start to the new year can build momentum that can carry across the days, weeks and months.&lt;/p&gt;
+        <description>&lt;p&gt;Twenty fifteen. Time flies! I typically try to plan my year, personally, around my birthday, with more goal setting around that date. However the gravitas of New Years Day seems to grow with every passing year. Before you know it, we’re already 10 days into 2015. A good start to the new year can build momentum that can carry across the days, weeks and months.&lt;/p&gt;
 
-&lt;h2&gt;&amp;quot;The beginning is the most important part of the work.&amp;quot; -Plato&lt;/h2&gt;
+&lt;h2 id=&quot;the-beginning-is-the-most-important-part-of-the-work--plato&quot;&gt;“The beginning is the most important part of the work.” -Plato&lt;/h2&gt;
 
-&lt;p&gt;The start of a new year is a good excuse to finally get a blog going. I&amp;#39;ve written a few posts for our development blog at &lt;a href=&quot;http://developers.mobilesystem7.com/&quot;&gt;work&lt;/a&gt;, but not posted any kind of personal development blog. I found the writing about process helped with thinking through the task after completing the task. The follow on thought process has helped me in multiple ocassions to create future refactoring tasks.&lt;/p&gt;
+&lt;p&gt;The start of a new year is a good excuse to finally get a blog going. I’ve written a few posts for our development blog at &lt;a href=&quot;http://developers.mobilesystem7.com/&quot;&gt;work&lt;/a&gt;, but not posted any kind of personal development blog. I found the writing about process helped with thinking through the task after completing the task. The follow on thought process has helped me in multiple ocassions to create future refactoring tasks.&lt;/p&gt;
 
-&lt;p&gt;In hindsight, I should have set this up a long time ago. It&amp;#39;s even easier than I had thought. I have spun up small &amp;quot;blog&amp;quot; and project sites with Middleman in the past. But Jekyll and it&amp;#39;s GitHub pages integration was even simpler than setting up Middleman.&lt;/p&gt;
+&lt;p&gt;In hindsight, I should have set this up a long time ago. It’s even easier than I had thought. I have spun up small “blog” and project sites with Middleman in the past. But Jekyll and it’s GitHub pages integration was even simpler than setting up Middleman.&lt;/p&gt;
 
 &lt;p&gt;I look forward to writing about more, non-work, related development projects that I undertake. At this point my vision for &lt;em&gt;SimplBrew&lt;/em&gt; is as a catalyst for personal development, an excuse to experiment with new languages, frameworks, patterns and projects. Most important, is time to reflect and hopefully share some knowledge and experience.&lt;/p&gt;
 
-&lt;p&gt;In the spirit of sharing, here are some resources that I&amp;#39;ve found helpful to get a Jekyll blog up on GitHub pages, along with some other meta information.&lt;/p&gt;
+&lt;p&gt;In the spirit of sharing, here are some resources that I’ve found helpful to get a Jekyll blog up on GitHub pages, along with some other meta information.&lt;/p&gt;
 
-&lt;hr&gt;
-
-&lt;h2&gt;Jekyll/GitHub Pages specific&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;https://help.github.com/categories/github-pages-basics/&quot;&gt;Github pages&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://jekyllrb.com/docs/github-pages/&quot;&gt;Jekyll documentation&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://docs.vagrantup.com/v2/getting-started/up.html&quot;&gt;Vagrant documentation&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://iwantmyname.com/&quot;&gt;IWantMyName dns hosting&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;hr&gt;
-
-&lt;h2&gt;Web Basics&lt;/h2&gt;
+&lt;hr /&gt;
+&lt;p&gt;## Jekyll/GitHub Pages specific&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;https://training.github.com/kit/&quot;&gt;GitHub&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://www.codecademy.com/en/tracks/web&quot;&gt;HTML &amp;amp; CSS&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://www.codeschool.com/paths/javascript&quot;&gt;Javascript&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://rubykoans.com/&quot;&gt;Ruby&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://help.github.com/categories/github-pages-basics/&quot;&gt;Github pages&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://jekyllrb.com/docs/github-pages/&quot;&gt;Jekyll documentation&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.vagrantup.com/v2/getting-started/up.html&quot;&gt;Vagrant documentation&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://iwantmyname.com/&quot;&gt;IWantMyName dns hosting&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;hr&gt;
-
-&lt;h2&gt;Tools&lt;/h2&gt;
+&lt;hr /&gt;
+&lt;p&gt;## Web Basics&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;http://www.sublimetext.com/&quot;&gt;SublimeText2&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://iterm2.com/&quot;&gt;iTerm2&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://gitx.frim.nl/&quot;&gt;GitX&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://training.github.com/kit/&quot;&gt;GitHub&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://www.codecademy.com/en/tracks/web&quot;&gt;HTML &amp;amp; CSS&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.codeschool.com/paths/javascript&quot;&gt;Javascript&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://rubykoans.com/&quot;&gt;Ruby&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;hr&gt;
+&lt;hr /&gt;
+&lt;p&gt;## Tools&lt;/p&gt;
 
-&lt;p&gt;Here&amp;#39;s to a great 2015 filled with fun projects, experiments and some learning. Feel free to reach out on &lt;a href=&quot;http://www.twitter.com/chasecourington&quot;&gt;@chasecourington&lt;/a&gt; or via &lt;a href=&quot;mailto:chase@simplbrew.com&quot;&gt;email&lt;/a&gt;&lt;br&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;http://www.sublimetext.com/&quot;&gt;SublimeText2&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://iterm2.com/&quot;&gt;iTerm2&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://gitx.frim.nl/&quot;&gt;GitX&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr /&gt;
+&lt;p&gt;Here’s to a great 2015 filled with fun projects, experiments and some learning. Feel free to reach out on &lt;a href=&quot;http://www.twitter.com/chasecourington&quot;&gt;@chasecourington&lt;/a&gt; or via &lt;a href=&quot;&amp;#109;&amp;#097;&amp;#105;&amp;#108;&amp;#116;&amp;#111;:&amp;#099;&amp;#104;&amp;#097;&amp;#115;&amp;#101;&amp;#064;&amp;#115;&amp;#105;&amp;#109;&amp;#112;&amp;#108;&amp;#098;&amp;#114;&amp;#101;&amp;#119;&amp;#046;&amp;#099;&amp;#111;&amp;#109;&quot;&gt;email&lt;/a&gt;  &lt;br /&gt;
 - Chase&lt;/p&gt;
 </description>
         <pubDate>Sat, 10 Jan 2015 05:00:00 -0700</pubDate>

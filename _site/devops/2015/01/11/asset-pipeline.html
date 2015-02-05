@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>SIMPLBREW</title>
+  <meta name="viewport" content="width=device-width">
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+</head>
+<body>
+  <header style="background-image: url(/images/posts/getting-started.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <h1>Replacing the Rails Asset Pipeline with Grunt, Bower and Browserify</h1>
+      <ul class="meta">
+        <li>
+          <span>
+            Published
+          </span>
+          11 Jan 2015
+        </li>
+        <li>
+          <span>
+            Category
+          </span>
+          devops
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+        <li class="previous">
+          <a href="/jekyll,/process/2015/01/10/welcome-to-2015.html">
+            Previous
+          </a>
+        </li>
+      
+      
+      <li class="next">
+        <a href="/devops/2015/01/28/automating-ui-tests.html">
+          Next
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+</header>
+
+<article>
+  <div class="container">
+    <p><em>original at <a href="http://developers.mobilesystem7.com/blog/post/replacing-rails-asset-pipeline-with-grunt-bower-browserify/">developers.mobilesystem7.com</a></em> At Mobile System 7 we’re always exploring ways to improve our process. Early this summer we had some disucssion about how to better decouple the UI, 99% Javascript, from the Rails application, which primarily powers our REST api. The opportunity to address this decoupling came when we added a story to address some UI build process issues.</p>
+
+<p>Our UI was using combination of <a href="http://guides.rubyonrails.org/v3.2.13/asset_pipeline.html">Rails 3.x Asset Pipeline</a> and <a href="http://gruntjs.com">Grunt</a> to build the UI in development and production environments. We needed streamline this process and agreed that the UI shouldn’t rely on Rails to build assets.</p>
+
+<p>The first step in replacing the asset pipeline is identifying what we’re relying on and what can we use as replacement. The objective is to decouple the UI from the Rails toolchain, maintaining benefits of the asset pipeline while improving configuration ability.</p>
+
+<p><em>Note: Since we’re already using Grunt and have Node/NPM installed and setup I won’t be going over getting that going but you can get some help <a href="https://www.joyent.com/blog/installing-node-and-npm/">here</a>. NPM will be initialized in your /app/assets/ directory</em></p>
+
+<hr />
+
+<h2 id="de-activate-the-asset-pipeline">De-activate the Asset Pipeline</h2>
+
+<p>The asset pipeline allows us to specify in our <code>/app/assets/</code> directories what javascripts, stylesheets and images to compile/minify. We’re going to replace most of this with <a href="http://gruntjs.com">Grunt</a> tasks. Deactivating the asset pipeline is done with a simple boolean in the application configuration file.</p>
+
+<h4 id="configapplicationrb">/config/application.rb</h4>
+
+<pre><code>config.assets.enabled = false
+</code></pre>
+
+<p>We should also update our development environment config variable that expands compiled assets for debugging since Rails isn’t handling any of the uglification/minification.</p>
+
+<h4 id="configenvironmentsdevelopmentrb">/config/environments/development.rb</h4>
+
+<pre><code>config.assets.debug = false
+</code></pre>
+
+<hr />
+
+<h2 id="update-the-gemfile">Update the Gemfile</h2>
+
+<p>With the asset pipeline enabled Rails automatically adds Gems to our Gemfile for certain dependencies. We have dependencies like <a href="http://getbootstrap.com">Bootstrap</a> and <a href="http://jquery.com/">jQuery</a> that we need for our UI but we want more control over these assets and with the asset pipeline de-activated it’s doesn’t make sense to have the Gemfile manage these assets.</p>
+
+<p>We have an <code>:assets</code> group in our Gemfile that we no longer need. The same gems also belong to a <code>:spec</code> group, which is for our Javascript unit tests, but we’ll be setting those up independent of the Rails app as well. We can remove this entire block in our Gemfile as well as remove the <a href="http://jasmine.github.io/">Jasmine</a> gem from our <code>:development</code> group (your Gemfile may differ).</p>
+
+<h4 id="gemfile">/Gemfile</h4>
+
+<pre><code>...
+group :assets, :spec do
+    gem 'jquery-rails', '2.2.1'
+    gem 'less-rails', '2.2.2'
+    gem 'therubyrhino', '2.0.2'
+    gem 'twitter-bootstrap-rails', '2.2.3'
+end
+
+group :development do
+    gem 'jasmine', '1.3.2'
+end
+...
+</code></pre>
+
+<p>We use <a href="http://jasmine.github.io/">Jasmine</a> for Javascript unit tests. Since these don’t rely on any part of the Rails app and we can run them independently with Grunt, we’ll be setting that up as well.</p>
+
+<p>We’ll use <a href="http://bower.io/">Bower</a> to replace those Gems in the <code>:assets</code> group. Bower gives us a little more control over the configuration of where we get the assets, where we install the assets, what to call the assets, etc. We’ll setup Bower in just a little bit.</p>
+
+<p>Once you’ve removed those gems/groups from your Gemfile, don’t forget to run <code>$ bundle install</code> to get a fresh install of your Gemfile and restart your webserver <code>$ rails s</code>. Your app should look pretty different now without those assets.</p>
+
+<hr />
+
+<h2 id="architecture-of-the-ui">Architecture of the UI</h2>
+
+<p>We’ll be using <a href="http://nodejs.org/">Node</a>/<a href="https://www.npmjs.org/">NPM</a>, <a href="http://gruntjs.com">Grunt</a>, <a href="http://bower.io/">Bower</a> and a litte <a href="http://browserify.org/">Browserify</a>. Before we setup any Grunt tasks or load any Bower assets let’s get our UI architecture in the Rails app setup.</p>
+
+<p>We’ll keep our development UI code in <code>/app/assets/</code> just as before, we’ll add a couple of new things to make our UI a “independent Node-ish” application. The <code>/images/</code>, <code>/javascripts/</code> and <code>/stylesheets/</code> should look familiar.</p>
+
+<p>We’ll be storing vendor assets from Bower in <code>/vendor/assets/</code>, where Rails previously stored assets managed by the Gemfile. With Bower we can configure how this directory is structured a little better than we can relying on the Gemfile.</p>
+
+<p>In our Rails app, <code>/public/</code> will contain the files that are served up to our application and it also includes some of the default Rails files like <code>404.html</code>. This will be where all our compiled, concatenated, uglified/minified files will end up.</p>
+
+<h4 id="appassets">/app/assets/</h4>
+
+<pre><code>|-- /app/assets/
+|  |-- images/
+|  |-- javascripts/
+|  |-- stylesheets/
+|  |-- tests/
+|  |-- grunt_tasks/
+|  |-- node_modules/
+|  |-- Gruntfile.js
+|  |-- package.json
+</code></pre>
+
+<h4 id="vendorassets">/vendor/assets/</h4>
+
+<pre><code>|-- /vendor/assets/
+|   |-- fonts/
+|   |-- images/
+|   |-- javascripts/
+|   |-- stylesheets/
+|   |-- less/
+|   |-- tests/
+</code></pre>
+
+<h4 id="public">/public/</h4>
+
+<pre><code>|-- /public/
+|   |-- fonts/
+|   |-- images/
+|   |-- javascripts/
+|   |-- stylesheets/
+...
+</code></pre>
+
+<ul>
+  <li>
+    <p><strong>/app/assets/images/</strong></p>
+
+    <p>We want to optimize the contents and copy optimized images to <code>/public/images/</code> to be served up for the application. We’ll be using: <br />
+  <!-- - [grunt-contrib-copy](https://github.com/gruntjs/grunt-contrib-copy) --><br />
+  - <a href="https://github.com/gruntjs/grunt-contrib-imagemin">grunt-contrib-imagemin</a><br />
+  <!-- - [grunt-newer](https://github.com/tschaub/grunt-newer) --></p>
+  </li>
+  <li>
+    <p><strong>/app/assets/javascripts/</strong></p>
+
+    <p>The bulk of our UI, we organize with sub-directories for our <a href="http://backbonejs.org/">Backbone.js</a> app and <a href="http://handlebarsjs.com/">Handlebars</a> templates. We need to lint, pre-compile, concatenate and copy the contents <code>/public/javascripts/</code> to be served to the application. Here we’re using:<br />
+  - <a href="https://github.com/gruntjs/grunt-contrib-jshint">grunt-contrib-jshint</a><br />
+  - <a href="https://github.com/gruntjs/grunt-contrib-concat">grunt-contrib-concat</a><br />
+  - <a href="https://github.com/jmreidy/grunt-browserify">grunt-browserify</a> with <a href="https://github.com/epeli/node-hbsfy">hbsfy</a></p>
+  </li>
+  <li>
+    <p><strong>/app/assets/stylesheets/</strong></p>
+
+    <p>We use <a href="http://lesscss.org/">LESS</a> as our CSS pre-processor, you could use <a href="http://sass-lang.com/">SASS</a> or any other option if you’d like. We chose LESS for a slight performance advantage over SASS because it uses Node instead of Ruby for compilation. In the effort to decouple from Rails, we want the pre-processor that doesn’t require another dependency outside of our Node toolchain.</p>
+
+    <p>We want to compile our LESS files to CSS, concatenate them with any other vendor stylesheets we use and copy the resulting stylesheet to our <code>/public/stylesheets/</code> to be served up to the application. We’ll be using:<br />
+  - <a href="https://github.com/gruntjs/grunt-contrib-less">grunt-contrib-less</a><br />
+  - <a href="https://github.com/gruntjs/grunt-contrib-concat">grunt-contrib-concat</a><br />
+  - <a href="https://github.com/gruntjs/grunt-contrib-cssmin">grunt-contrib-cssmin</a></p>
+  </li>
+  <li>
+    <p><strong>/app/assets/tests/</strong></p>
+
+    <p>We’re moving our Javascript unit tests away from being managed by the Rails toolchain so we can have them standalone and run more easily in development. We can write our tests and easily target our <code>/app/assets/javascripts/</code> for testing. Our tests use:<br />
+  - <a href="https://github.com/gruntjs/grunt-contrib-jasmine">grunt-contrib-jasmine</a></p>
+  </li>
+</ul>
+
+<hr />
+
+<h2 id="setting-up-node-modules">Setting up Node Modules</h2>
+
+<p>We need to initialize or update our existing <code>package.json</code> file to tell NPM what packages to install. In our case we’ll be installing all our packages as <code>devDependencies</code> and configuring some of the <code>scripts</code> to automate global installs for <a href="https://github.com/gruntjs/grunt-cli">grunt-cli</a> and <a href="http://bower.io/">bower</a>.</p>
+
+<p>If you don’t have a <code>package.json</code> then <code>$ cd /app/assets/</code>, remember this is our “node app”, and <code>$ npm init</code> (You need Node/NPM installed).</p>
+
+<p>If you have a <code>package.json</code> then make sure it’s in <code>/app/assets/</code> and open it in your favorite text editor and add:</p>
+
+<h4 id="appassetspackagejson">/app/assets/package.json</h4>
+
+<pre><code>...
+"scripts": {
+    "pre-install": "npm install -g grunt-cli bower"
+},
+...
+</code></pre>
+
+<p>Running <code>$ npm install</code> will now install <strong>grunt-cli</strong> and <strong>bower</strong> globally before installing any of your Node packages. <em>NPM has it’s <a href="https://www.npmjs.org/doc/misc/npm-scripts.html">opinion on install scripts</a>, but we’ve found this to work for us and we’re not publishing this as a package, tread lightly.</em></p>
+
+<p>You’ll now have <code>$ grunt</code> and <code>$ bower</code> commands available to you for running tasks and installing packages.</p>
+
+<p>Now that we have those in place we need to install our <code>devDependencies</code>, mostly all Grunt tasks. Here’s what our <code>devDependencies</code> attribute in <code>package.json</code> should look something like.</p>
+
+<h4 id="appassetspackagejson-1">/app/assets/package.json</h4>
+
+<pre><code>...
+"devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-bower-task": "^0.4.0",
+    "grunt-browserify": "^3.0.1",
+    "grunt-concurrent": "^1.0.0",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-concat": "^0.5.0",
+    "grunt-contrib-connect": "^0.8.0",
+    "grunt-contrib-copy": "^0.6.0",
+    "grunt-contrib-cssmin": "^0.10.0",
+    "grunt-contrib-imagemin": "^0.8.1",
+    "grunt-contrib-jasmine": "^0.8.0",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-less": "^0.11.4",
+    "grunt-contrib-uglify": "^0.6.0",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-modernizr": "^0.6.0",
+    "grunt-newer": "^0.7.0",
+    "grunt-open": "^0.2.3",
+    "handlebars": "^2.0.0",
+    "hbsfy": "^2.2.0",
+    "time-grunt": "^1.0.0"
+}
+...
+</code></pre>
+
+<hr />
+
+<h2 id="install-bower-packages">Install Bower packages</h2>
+
+<p>Run <code>$ bower init</code> from your <code>/app/assets/</code> and it’ll take you through creating a <code>Bower.json</code> file, that is a configuration file very similar to the <code>package.json</code> to tell Bower what packages to install. We can creat/edit a <code>.bowerrc</code> file to tell Bower where we want our <code>bower_components</code> installed, in our case we want to install to <code>/vendor/assets/</code>.</p>
+
+<p>We use <a href="https://github.com/yatskevich/grunt-bower-task">grunt-bower-task</a> to add a Grunt task that will install our packages and give us more control over what gets installed and where. We can configure the <code>Bower.json</code> with <code>exportsOverride</code> to install specific packages js, css, img, font where we want…in corresponding <code>/vendor/assets/</code> and then we use <a href="https://github.com/gruntjs/grunt-contrib-copy">grunt-contrib-copy</a> to move files from <code>/vendor/</code> to <code>/public/</code> and - <a href="https://github.com/gruntjs/grunt-contrib-concat">grunt-contrib-concat</a> to concatenate javascripts and stylesheets together and move from <code>/vendor/</code> to <code>/public/</code>.</p>
+
+<h4 id="appassetsbowerjson">/app/assets/bower.json</h4>
+
+<pre><code>...
+"dependencies": {
+    "backbone": "1.0.0",
+    "bootstrap": "2.3.2",
+    "moment": "2.5.0",
+    "d3": "~3.4.9",
+    "leaflet": "~0.7.3",
+    "underscore": "~1.6.0",
+    "mustache": "~0.8.2",
+    "jquery-ujs": "~1.0.0",
+    "fontawesome": "3.2.1",
+    "jquery": "2.0.3",
+    "bootstrap-datepicker": "~1.2.0",
+    "jquery-Mustache": "~0.2.7",
+    "leaflet.markercluster": "~0.4.0",
+    "modernizr": "~2.8.3"
+},
+"devDependencies": {
+    "jasmine-jquery": "2.0.5",
+    "sinon": "http://sinonjs.org/releases/sinon-1.10.3.js"
+},
+"exportsOverride": {
+    "bootstrap": {
+      "javascripts": "js/*.js",
+      "stylesheets": "css/*.css",
+      "less": "less/*.less",
+      "images": "img/*.png"
+    },
+    "backbone": {
+      "javascripts": "backbone.js"
+    },
+    "d3": {
+      "javascripts": "d3.js"
+    },
+    "fontawesome": {
+      "stylesheets": "css/*.css",
+      "less": "less/*.less",
+      "fonts": "font/*"
+    },
+    "leaflet.markercluster": {
+      "stylesheets": "dist/*.css",
+      "javascripts": "dist/*.js",
+      "fonts": "font/*"
+    },...
+...
+</code></pre>
+
+<hr />
+
+<h2 id="setting-up-grunt-tasks">Setting up Grunt tasks</h2>
+
+<p>We have our <code>bower.json</code> setup, our <code>package.json</code> setup and finally we need to setup some Grunt tasks to work build our UI.</p>
+
+<p>To keep our Gruntfile manageable we break up our Grunt tasks in the <code>/app/assets/grunt_tasks/</code> and load them in commonjs style to our <code>/app/assets/Gruntfile.js</code>.</p>
+
+<p>We need a task that can prep our directories/files. The prep task will be the baseline task for:</p>
+
+<ul>
+  <li>cleaning compiled code, <code>/vendor/assets/</code>, and <code>/public/</code></li>
+  <li>installing Bower assets to <code>/vendor/assets/</code></li>
+  <li>hinting our javascripts in <code>/app/assets/javascripts/</code></li>
+  <li>pre-compiling our handlebars templates </li>
+  <li>compiling our less to css</li>
+  <li>concatenating our javascripts, vendor assets and stylesheets</li>
+  <li>moving assets to <code>/public/</code> to be served</li>
+  <li>optimizing our <code>/public/images/</code></li>
+  <li>running our javascript unit tests</li>
+</ul>
+
+<h4 id="appassetsgruntfilejs">/app/assets/Gruntfile.js</h4>
+
+<pre><code>module.exports = function (grunt) {
+
+    // output task timing
+    require('time-grunt')(grunt);
+
+    // Project config
+    grunt.initConfig({
+        
+        // read grunt tasks from npm
+        pkg: grunt.file.readJSON('package.json'),
+        
+        // configure paths for grunt plugins
+        paths: {
+            assets: '../../vendor/assets',
+            tests: 'tests',
+
+            src_js: 'javascripts', 
+            src_css: 'stylesheets',
+            src_img: 'images',
+            src_font: 'fonts',
+            src_json: 'json',
+            src_tmp: 'tmp',
+
+            dist_js: '../../public/javascripts',
+            dist_css: '../../public/stylesheets',
+            dist_img: '../../public/images',
+            dist_font: '../../public/fonts',
+            dist_json: '../../public/json'
+        }
+
+    });
+
+    // load grunt plugins from directory
+    grunt.loadTasks('grunt_tasks');
+
+    grunt.registerTask('prep',
+        'Prepare project assets',
+        ['clean:nuke', 'bower', 'jshint', 'browserify', 'less', 'concat', 'copy', 'newer:imagemin', 'jasmine:ci']
+    );
+
+    grunt.registerTask('dev',
+        'Prepare project assets',
+        ['prep', 'watch']
+    );
+
+    grunt.registerTask('prod',
+        'Prepare project assets',
+        ['prep', 'cssmin', 'uglify', 'clean:prod']
+    );
+
+    grunt.registerTask('default', ['prep', 'dev', 'prod']);
+
+};
+</code></pre>
+
+<p>Once we configure those Grunt tasks We can run <code>$ grunt prep</code> and watch things build. From here we have <code>grunt dev</code> that adds a watch task in the mix to run while changes are made to files we’re watching.</p>
+
+<h4 id="appassetsgrunttaskscontrib-watchjs">/app/assets/grunt_tasks/contrib-watch.js</h4>
+
+<pre><code>module.exports = function (grunt) {
+
+    grunt.config.set('watch', {
+
+        scripts: {
+            files: [
+                '!.grunt',
+                '&lt;%= paths.src_js %&gt;/**/*.js',
+                '&lt;%= paths.src_css %&gt;/less/**',
+                '&lt;%= paths.tests %&gt;/**/*.js'
+            ],
+            tasks: ['newer:jshint', 'newer:browserify', 'newer:less', 'newer:concat', 'newer:copy', 'newer:imagemin', 'jasmine:ci'],
+            options: {
+                interrupt: true
+            }
+        }
+
+    });
+
+    grunt.loadNpmTasks('grunt-contrib-watch');
+
+};
+</code></pre>
+
+<p>We also have a <code>grunt prod</code> task that will run our <code>grunt prep</code> task and then also run grunt-contrib-cssmin and grunt-contrib-uglify on our stylesheets and javascripts to minify and uglify. Then it will clean out the non-minified/uglified files from <code>/public/**</code> so that only those minified files are served up.</p>
+
+<p>Let’s take a look at <code>bower-task.js</code> to install our Bower packages. Below is what we’ve got.</p>
+
+<h4 id="appassetsgrunttasksbower-taskjs">/app/assets/grunt_tasks/bower-task.js</h4>
+
+<pre><code>module.exports = function(grunt) {
+
+    grunt.config.set('bower', {
+
+        install: {
+            options: {
+                targetDir: '&lt;%= paths.assets %&gt;',
+                install: true,
+                cleanTargetDir: true,  // clean the targetDir
+                cleanBowerDir: true,  // clean the bower_components dir
+                cleanup: true,  // set cleanBowerDir &amp; cleanTargetDir
+                copy: true,  // copy bower_components packages to targetDir
+                layout: 'byType',  // format tree by component =&gt; js/css/less/img
+                verbose: false,
+                bowerOptions: {
+                    forceLatest: false,  // Force latest version on conflict
+                    production: false  // Do not install project devDependencies
+                }
+            }
+        }
+
+    });
+
+    grunt.loadNpmTasks('grunt-bower-task');
+
+};
+</code></pre>
+
+<p>The other heavy lifter of our Grunt tasks is the grunt-contrib-concat task. Concat takes all our vendor files, javascripts and stylesheets, and allows us to concatenate them together in a load order so that we can serve up a single file, reducing requests and making uglification/minification easier. It also handles a lot of the moving of files from our <code>/app/assets/**</code> to our <code>/public/**</code> with the destination concatenated files.</p>
+
+<h4 id="appassetsgrunttaskscontrib-concatjs">/app/assets/grunt_tasks/contrib-concat.js</h4>
+
+<pre><code>module.exports = function (grunt) {
+
+    grunt.config.set('concat', {
+
+        options: {},
+
+        testhelpers: {
+            src: [
+                '&lt;%= paths.assets %&gt;/test/jasmine-jquery/jasmine-jquery.js',
+                '&lt;%= paths.assets %&gt;/test/sinon/index.js',
+            ],
+            dest: '&lt;%= paths.tests %&gt;/sinon-jasmine-jquery.js'
+        },
+
+
+        app_js: {
+            src: [
+                '&lt;%= paths.assets %&gt;/js/modernizr/modernizr.custom.js',
+                '&lt;%= paths.assets %&gt;/js/jquery/jquery.js',
+                '&lt;%= paths.assets %&gt;/jquery-ujs/rails.js',
+                '&lt;%= paths.assets %&gt;/js/bootstrap/*.js',
+                '&lt;%= paths.assets %&gt;/bootstrap-datepicker/bootstrap-datepicker.js',
+                '&lt;%= paths.assets %&gt;/js/d3/d3.js',
+                '&lt;%= paths.assets %&gt;/js/underscore/underscore.js',
+                '&lt;%= paths.assets %&gt;/js/backbone/backbone.js',
+                '&lt;%= paths.assets %&gt;/js/mustache/mustache.js',
+                '&lt;%= paths.assets %&gt;/js/jquery-Mustache/jquery.mustache.js',
+                '&lt;%= paths.assets %&gt;/js/moment/moment.js',
+                '&lt;%= paths.assets %&gt;/leaflet/leaflet.js',
+                '&lt;%= paths.assets %&gt;/js/leaflet.markercluster/leaflet.markercluster.js',
+                '&lt;%= paths.src_js %&gt;/vendor/bootstrap-overrides.js'
+            ],
+            dest: '&lt;%= paths.dist_js %&gt;/app.js'
+        },
+
+
+        styles: {
+            src: [
+                '&lt;%= paths.src_css %&gt;/compiled/app.css',
+                '&lt;%= paths.assets %&gt;/bootstrap-datepicker/datepicker.css',
+                '&lt;%= paths.assets %&gt;/leaflet/leaflet.css',
+                '&lt;%= paths.assets %&gt;/css/leaflet.markercluster/MarkerCluster.css'
+            ],
+            dest: '&lt;%= paths.dist_css%&gt;/app.css'
+        },
+...
+</code></pre>
+
+<hr />
+
+<h2 id="serving-up-the-ui">Serving up the UI</h2>
+
+<p>In our Rails app we still use .erb <code>stylesheet_link_tag</code> and <code>javascript_include_tag</code> since they target the <code>/public/</code> directory and automatically add a hash to aid in cache busting. Here’s an example of how we’re including styles and javascripts.</p>
+
+<h4 id="appviewslayoutsapplicationhtmlerb">/app/views/layouts/application.html.erb</h4>
+
+<pre><code>&lt;% if Rails.env =~ /production/ %&gt;
+    &lt;%= stylesheet_link_tag "/stylesheets/app.min.css", media: "all" %&gt;
+    &lt;%= javascript_include_tag "/javascripts/app.min.js" %&gt;
+&lt;% else %&gt;
+    &lt;%= stylesheet_link_tag "/stylesheets/app.css", media: "all" %&gt;
+    &lt;%= javascript_include_tag "/javascripts/app.js" %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<hr />
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>While we’re able to make some major strides in decoupling our UI from the rest of the Rails app there is still some work to be done. It would be good to get <a href="https://github.com/yeoman/grunt-filerev">grunt-filerev</a> and <a href="https://github.com/yeoman/grunt-usemin">grunt-usemin</a> included so we don’t have to use the Rails asset hashing for cache busting and can also remove those ugly .erb tags. We’d like to introduce Browserify more into the process to reduce the size/complexity of our <code>contrib-concat.js</code> file and grunt-contrib-concat task by using commonjs style includes into our javascripts. All in all, decoupling the UI has worked well and helped to improve our UI development process by giving us more control over the configuration.</p>
+
+<p>For questions or comments feel free to reach out <a href="https://twitter.com/chasecourington">@chasecourington</a>. Cheers!</p>
+
+  </div>
+</article>
+
+</body>
+</html>
