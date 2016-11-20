@@ -3,8 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>SIMPLBREW</title>
+  <title>Chase Courington - Product Developer</title>
   <meta name="viewport" content="width=device-width">
+  <meta name="description" content="this is the description">
 
   <!-- syntax highlighting CSS -->
   <link rel="stylesheet" href="/css/syntax.css">
@@ -35,7 +36,7 @@
           <span>
             Category
           </span>
-          devops
+          DevOps
         </li>
       </ul>      
     </div>
@@ -47,6 +48,12 @@
           </a>
         </li>
       
+      
+      <li class="next">
+        <a href="/software/2016/08/02/uprev-mac-virtualbox.html">
+          Next
+        </a>
+      </li>
       
     </ul>
   </div>
@@ -68,7 +75,7 @@
 <a href="//www.theintern.io">Intern</a> interacts with Sauce Labs’ API and give us a framework to write functional (and unit) tests for Selenium. Intern gives us tons of flexibility and a stable backing with <a href="//www.sitepen.com">Site Pen</a> the creators of Dojo. Install to your <strong>package.json</strong> development dependencies: <code>$ npm install intern --save-d</code></p>
 
 <hr />
-<p>## Grunt and Intern<br />
+<p>## Grunt and Intern
 Getting Intern to work with <a href="//gruntjs.com">Grunt</a> is easy since support is <a href="//github.com/theintern/intern/wiki/Using-Intern-with-Grunt">baked into Intern</a>. We created an Intern task and wired it into our <strong>gruntfile.js</strong>:</p>
 
 <p><strong>/grunt_tasks/intern.js</strong></p>
@@ -118,7 +125,7 @@ Getting Intern to work with <a href="//gruntjs.com">Grunt</a> is easy since supp
 <p>We run <code>$ grunt intern</code> in a <strong>“prod”</strong> task. We still use <a href="//jasmine.github.io/2.1/introduction.html">Jasmine</a> for our unit tests and for development (for now). We run UI tests when we build for a release since the the UI tests cost more (time and money).</p>
 
 <hr />
-<p>## Configure Intern<br />
+<p>## Configure Intern
 The <a href="//github.com/theintern/intern/wiki/Configuring-Intern">Intern docs</a> are pretty great and help us get going with configuration. Areas of interest to get going are:</p>
 
 <ul>
@@ -175,7 +182,7 @@ The <a href="//github.com/theintern/intern/wiki/Configuring-Intern">Intern docs<
 <hr />
 <p>## Run the Tests</p>
 
-<p>This is now as easy as <code>$ grunt intern</code>. </p>
+<p>This is now as easy as <code>$ grunt intern</code>.</p>
 
 <p>We get ci output giving you status and reporting test results back to you. You can see from the image we have 1 failure.
 <img src="/images/sauceLabs_intern_ciOutput.png" /></p>
@@ -203,13 +210,13 @@ The <a href="//github.com/theintern/intern/wiki/Configuring-Intern">Intern docs<
 <p>For questions, comments, suggestions, etc. please reach out. <a href="https://twitter.com/chasecourington">@chasecourington</a></p>
 
 <hr />
-<p>## Resources<br />
-- <a href="https://docs.saucelabs.com/reference/test-configuration/#webdriver-api">Sauce Labs webdriver api</a><br />
-- <a href="https://github.com/theintern/intern/wiki/Configuring-Intern">The Intern configuration</a><br />
-- <a href="https://theintern.github.io/leadfoot/Command.html">Leadfoot /Command</a><br />
-- <a href="http://chaijs.com/api/assert/">Chai assert</a><br />
-- <a href="https://github.com/theintern/intern/wiki/Using-Intern-with-Grunt">Grunt + Intern</a><br />
-- <a href="https://github.com/theintern/intern-examples">Intern examples</a><br />
+<p>## Resources
+- <a href="https://docs.saucelabs.com/reference/test-configuration/#webdriver-api">Sauce Labs webdriver api</a>
+- <a href="https://github.com/theintern/intern/wiki/Configuring-Intern">The Intern configuration</a>
+- <a href="https://theintern.github.io/leadfoot/Command.html">Leadfoot /Command</a>
+- <a href="http://chaijs.com/api/assert/">Chai assert</a>
+- <a href="https://github.com/theintern/intern/wiki/Using-Intern-with-Grunt">Grunt + Intern</a>
+- <a href="https://github.com/theintern/intern-examples">Intern examples</a>
 - <a href="http://docs.seleniumhq.org/docs/index.jsp">Selenium docs</a></p>
 
 <p><em>Originally posted at <a href="http://developers.mobilesystem7.com/blog/post/automating-ui-tests/">developer.mobilesystem7.com</a></em></p>

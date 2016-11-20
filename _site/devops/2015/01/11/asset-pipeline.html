@@ -3,8 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>SIMPLBREW</title>
+  <title>Chase Courington - Product Developer</title>
   <meta name="viewport" content="width=device-width">
+  <meta name="description" content="this is the description">
 
   <!-- syntax highlighting CSS -->
   <link rel="stylesheet" href="/css/syntax.css">
@@ -35,7 +36,7 @@
           <span>
             Category
           </span>
-          devops
+          DevOps
         </li>
       </ul>      
     </div>
@@ -74,14 +75,14 @@
 
 <p>The asset pipeline allows us to specify in our <code>/app/assets/</code> directories what javascripts, stylesheets and images to compile/minify. We’re going to replace most of this with <a href="http://gruntjs.com">Grunt</a> tasks. Deactivating the asset pipeline is done with a simple boolean in the application configuration file.</p>
 
-<h4 id="configapplicationrb">/config/application.rb</h4>
+<p>####/config/application.rb</p>
 
 <pre><code>config.assets.enabled = false
 </code></pre>
 
 <p>We should also update our development environment config variable that expands compiled assets for debugging since Rails isn’t handling any of the uglification/minification.</p>
 
-<h4 id="configenvironmentsdevelopmentrb">/config/environments/development.rb</h4>
+<p>####/config/environments/development.rb</p>
 
 <pre><code>config.assets.debug = false
 </code></pre>
@@ -94,7 +95,7 @@
 
 <p>We have an <code>:assets</code> group in our Gemfile that we no longer need. The same gems also belong to a <code>:spec</code> group, which is for our Javascript unit tests, but we’ll be setting those up independent of the Rails app as well. We can remove this entire block in our Gemfile as well as remove the <a href="http://jasmine.github.io/">Jasmine</a> gem from our <code>:development</code> group (your Gemfile may differ).</p>
 
-<h4 id="gemfile">/Gemfile</h4>
+<p>####/Gemfile</p>
 
 <pre><code>...
 group :assets, :spec do
@@ -128,7 +129,7 @@ end
 
 <p>In our Rails app, <code>/public/</code> will contain the files that are served up to our application and it also includes some of the default Rails files like <code>404.html</code>. This will be where all our compiled, concatenated, uglified/minified files will end up.</p>
 
-<h4 id="appassets">/app/assets/</h4>
+<p>####/app/assets/</p>
 
 <pre><code>|-- /app/assets/
 |  |-- images/
@@ -141,7 +142,7 @@ end
 |  |-- package.json
 </code></pre>
 
-<h4 id="vendorassets">/vendor/assets/</h4>
+<p>####/vendor/assets/</p>
 
 <pre><code>|-- /vendor/assets/
 |   |-- fonts/
@@ -152,7 +153,7 @@ end
 |   |-- tests/
 </code></pre>
 
-<h4 id="public">/public/</h4>
+<p>####/public/</p>
 
 <pre><code>|-- /public/
 |   |-- fonts/
@@ -166,17 +167,17 @@ end
   <li>
     <p><strong>/app/assets/images/</strong></p>
 
-    <p>We want to optimize the contents and copy optimized images to <code>/public/images/</code> to be served up for the application. We’ll be using: <br />
-  <!-- - [grunt-contrib-copy](https://github.com/gruntjs/grunt-contrib-copy) --><br />
-  - <a href="https://github.com/gruntjs/grunt-contrib-imagemin">grunt-contrib-imagemin</a><br />
+    <p>We want to optimize the contents and copy optimized images to <code>/public/images/</code> to be served up for the application. We’ll be using: 
+  <!-- - [grunt-contrib-copy](https://github.com/gruntjs/grunt-contrib-copy) -->
+  - <a href="https://github.com/gruntjs/grunt-contrib-imagemin">grunt-contrib-imagemin</a>
   <!-- - [grunt-newer](https://github.com/tschaub/grunt-newer) --></p>
   </li>
   <li>
     <p><strong>/app/assets/javascripts/</strong></p>
 
-    <p>The bulk of our UI, we organize with sub-directories for our <a href="http://backbonejs.org/">Backbone.js</a> app and <a href="http://handlebarsjs.com/">Handlebars</a> templates. We need to lint, pre-compile, concatenate and copy the contents <code>/public/javascripts/</code> to be served to the application. Here we’re using:<br />
-  - <a href="https://github.com/gruntjs/grunt-contrib-jshint">grunt-contrib-jshint</a><br />
-  - <a href="https://github.com/gruntjs/grunt-contrib-concat">grunt-contrib-concat</a><br />
+    <p>The bulk of our UI, we organize with sub-directories for our <a href="http://backbonejs.org/">Backbone.js</a> app and <a href="http://handlebarsjs.com/">Handlebars</a> templates. We need to lint, pre-compile, concatenate and copy the contents <code>/public/javascripts/</code> to be served to the application. Here we’re using:
+  - <a href="https://github.com/gruntjs/grunt-contrib-jshint">grunt-contrib-jshint</a>
+  - <a href="https://github.com/gruntjs/grunt-contrib-concat">grunt-contrib-concat</a>
   - <a href="https://github.com/jmreidy/grunt-browserify">grunt-browserify</a> with <a href="https://github.com/epeli/node-hbsfy">hbsfy</a></p>
   </li>
   <li>
@@ -184,15 +185,15 @@ end
 
     <p>We use <a href="http://lesscss.org/">LESS</a> as our CSS pre-processor, you could use <a href="http://sass-lang.com/">SASS</a> or any other option if you’d like. We chose LESS for a slight performance advantage over SASS because it uses Node instead of Ruby for compilation. In the effort to decouple from Rails, we want the pre-processor that doesn’t require another dependency outside of our Node toolchain.</p>
 
-    <p>We want to compile our LESS files to CSS, concatenate them with any other vendor stylesheets we use and copy the resulting stylesheet to our <code>/public/stylesheets/</code> to be served up to the application. We’ll be using:<br />
-  - <a href="https://github.com/gruntjs/grunt-contrib-less">grunt-contrib-less</a><br />
-  - <a href="https://github.com/gruntjs/grunt-contrib-concat">grunt-contrib-concat</a><br />
+    <p>We want to compile our LESS files to CSS, concatenate them with any other vendor stylesheets we use and copy the resulting stylesheet to our <code>/public/stylesheets/</code> to be served up to the application. We’ll be using:
+  - <a href="https://github.com/gruntjs/grunt-contrib-less">grunt-contrib-less</a>
+  - <a href="https://github.com/gruntjs/grunt-contrib-concat">grunt-contrib-concat</a>
   - <a href="https://github.com/gruntjs/grunt-contrib-cssmin">grunt-contrib-cssmin</a></p>
   </li>
   <li>
     <p><strong>/app/assets/tests/</strong></p>
 
-    <p>We’re moving our Javascript unit tests away from being managed by the Rails toolchain so we can have them standalone and run more easily in development. We can write our tests and easily target our <code>/app/assets/javascripts/</code> for testing. Our tests use:<br />
+    <p>We’re moving our Javascript unit tests away from being managed by the Rails toolchain so we can have them standalone and run more easily in development. We can write our tests and easily target our <code>/app/assets/javascripts/</code> for testing. Our tests use:
   - <a href="https://github.com/gruntjs/grunt-contrib-jasmine">grunt-contrib-jasmine</a></p>
   </li>
 </ul>
@@ -207,7 +208,7 @@ end
 
 <p>If you have a <code>package.json</code> then make sure it’s in <code>/app/assets/</code> and open it in your favorite text editor and add:</p>
 
-<h4 id="appassetspackagejson">/app/assets/package.json</h4>
+<p>####/app/assets/package.json</p>
 
 <pre><code>...
 "scripts": {
@@ -222,7 +223,7 @@ end
 
 <p>Now that we have those in place we need to install our <code>devDependencies</code>, mostly all Grunt tasks. Here’s what our <code>devDependencies</code> attribute in <code>package.json</code> should look something like.</p>
 
-<h4 id="appassetspackagejson-1">/app/assets/package.json</h4>
+<p>####/app/assets/package.json</p>
 
 <pre><code>...
 "devDependencies": {
@@ -259,7 +260,7 @@ end
 
 <p>We use <a href="https://github.com/yatskevich/grunt-bower-task">grunt-bower-task</a> to add a Grunt task that will install our packages and give us more control over what gets installed and where. We can configure the <code>Bower.json</code> with <code>exportsOverride</code> to install specific packages js, css, img, font where we want…in corresponding <code>/vendor/assets/</code> and then we use <a href="https://github.com/gruntjs/grunt-contrib-copy">grunt-contrib-copy</a> to move files from <code>/vendor/</code> to <code>/public/</code> and - <a href="https://github.com/gruntjs/grunt-contrib-concat">grunt-contrib-concat</a> to concatenate javascripts and stylesheets together and move from <code>/vendor/</code> to <code>/public/</code>.</p>
 
-<h4 id="appassetsbowerjson">/app/assets/bower.json</h4>
+<p>####/app/assets/bower.json</p>
 
 <pre><code>...
 "dependencies": {
@@ -322,7 +323,7 @@ end
   <li>cleaning compiled code, <code>/vendor/assets/</code>, and <code>/public/</code></li>
   <li>installing Bower assets to <code>/vendor/assets/</code></li>
   <li>hinting our javascripts in <code>/app/assets/javascripts/</code></li>
-  <li>pre-compiling our handlebars templates </li>
+  <li>pre-compiling our handlebars templates</li>
   <li>compiling our less to css</li>
   <li>concatenating our javascripts, vendor assets and stylesheets</li>
   <li>moving assets to <code>/public/</code> to be served</li>
@@ -330,7 +331,7 @@ end
   <li>running our javascript unit tests</li>
 </ul>
 
-<h4 id="appassetsgruntfilejs">/app/assets/Gruntfile.js</h4>
+<p>####/app/assets/Gruntfile.js</p>
 
 <pre><code>module.exports = function (grunt) {
 
@@ -389,7 +390,7 @@ end
 
 <p>Once we configure those Grunt tasks We can run <code>$ grunt prep</code> and watch things build. From here we have <code>grunt dev</code> that adds a watch task in the mix to run while changes are made to files we’re watching.</p>
 
-<h4 id="appassetsgrunttaskscontrib-watchjs">/app/assets/grunt_tasks/contrib-watch.js</h4>
+<p>####/app/assets/grunt_tasks/contrib-watch.js</p>
 
 <pre><code>module.exports = function (grunt) {
 
@@ -419,7 +420,7 @@ end
 
 <p>Let’s take a look at <code>bower-task.js</code> to install our Bower packages. Below is what we’ve got.</p>
 
-<h4 id="appassetsgrunttasksbower-taskjs">/app/assets/grunt_tasks/bower-task.js</h4>
+<p>####/app/assets/grunt_tasks/bower-task.js</p>
 
 <pre><code>module.exports = function(grunt) {
 
@@ -451,7 +452,7 @@ end
 
 <p>The other heavy lifter of our Grunt tasks is the grunt-contrib-concat task. Concat takes all our vendor files, javascripts and stylesheets, and allows us to concatenate them together in a load order so that we can serve up a single file, reducing requests and making uglification/minification easier. It also handles a lot of the moving of files from our <code>/app/assets/**</code> to our <code>/public/**</code> with the destination concatenated files.</p>
 
-<h4 id="appassetsgrunttaskscontrib-concatjs">/app/assets/grunt_tasks/contrib-concat.js</h4>
+<p>####/app/assets/grunt_tasks/contrib-concat.js</p>
 
 <pre><code>module.exports = function (grunt) {
 
@@ -507,7 +508,7 @@ end
 
 <p>In our Rails app we still use .erb <code>stylesheet_link_tag</code> and <code>javascript_include_tag</code> since they target the <code>/public/</code> directory and automatically add a hash to aid in cache busting. Here’s an example of how we’re including styles and javascripts.</p>
 
-<h4 id="appviewslayoutsapplicationhtmlerb">/app/views/layouts/application.html.erb</h4>
+<p>####/app/views/layouts/application.html.erb</p>
 
 <pre><code>&lt;% if Rails.env =~ /production/ %&gt;
     &lt;%= stylesheet_link_tag "/stylesheets/app.min.css", media: "all" %&gt;
@@ -526,7 +527,7 @@ end
 
 <p>For questions or comments feel free to reach out <a href="https://twitter.com/chasecourington">@chasecourington</a>. Cheers!</p>
 
-<p><em>Originally posted at <a href="http://developers.mobilesystem7.com/blog/post/replacing-rails-asset-pipeline-with-grunt-bower-browserify/">developers.mobilesystem7.com</a></em> </p>
+<p><em>Originally posted at <a href="http://developers.mobilesystem7.com/blog/post/replacing-rails-asset-pipeline-with-grunt-bower-browserify/">developers.mobilesystem7.com</a></em></p>
 
   </div>
 </article>

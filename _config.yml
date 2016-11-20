@@ -1,6 +1,9 @@
 # Site settings
-title: 'SIMPLBREW' # Your Title
-tagline: 'Chase Courington - UI Developer' # A brief tagline for your site
+meta_title: 'Chase Courington - Product Developer'
+meta_description: 'this is the description'
+
+title: 'ideate & execute' # Your Title
+tagline: 'web product development' # A brief tagline for your site
 sidebar_image: /images/cover.jpg
 
 # Build settings
