@@ -1,29 +1,14 @@
----
-layout: default
----
-<header id="home-header" style="background-image: url({{ site.baseurl }}{{ site.sidebar_image }});">
-  <div class="container">
-    <h1>{{ site.title }}</h1>
-    <ul class="meta">
-      <li>
-        <span>
-          {{ site.tagline }}
-        </span>
-      </li>
-  </div>
-</header>
-<article>
-  <div class="container">
-    <ul class="posts">
-      {% for post in site.posts %}
-        <li>
-          <h2><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h2>
-          <span class="meta">
-            {{ post.date | date_to_string }}
-          </span>
-          {{ post.excerpt }}
-        </li>
-      {% endfor %}
-    </ul>
-  </div>
-</article>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Chase Courington 2020 Personal Website</title>
+  <meta name="viewport" content="width=device-width">
+  <meta name="description" content="Chase Courington 2020 Personal Site">
+</head>
+<body>
+  <h1>hello world!</h1>
+  <h2>this is a website for personal projects, cv, and blog</h2>
+</body>
+</html>
