@@ -1,23 +1,32 @@
 {
-  "name": "courington.github.io",
-  "version": "1.0.0",
-  "description": "personal site",
-  "main": "index.js",
+  "name": "chase-courington-dot-com",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "react-static start",
+    "stage": "react-static build --staging",
+    "build": "react-static build",
+    "analyze": "react-static build --analyze",
+    "serve": "serve dist -p 3000"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/courington/courington.github.io.git"
+  "dependencies": {
+    "@reach/router": "^1.2.1",
+    "axios": "^0.19.0",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0",
+    "react-static": "^7.2.0",
+    "react-static-plugin-reach-router": "^7.2.0",
+    "react-static-plugin-sitemap": "^7.2.0",
+    "react-static-plugin-source-filesystem": "^7.2.0"
   },
-  "author": "courington",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/courington/courington.github.io/issues"
-  },
-  "homepage": "https://github.com/courington/courington.github.io#readme",
   "devDependencies": {
-    "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.11"
+    "babel-eslint": "^10.0.2",
+    "eslint": "^6.1.0",
+    "eslint-config-react-app": "^5.0.1",
+    "eslint-config-react-tools": "^1.1.7",
+    "eslint-plugin-flowtype": "^4.2.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-react": "^7.14.3",
+    "serve": "^11.1.0"
   }
 }
