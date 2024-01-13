@@ -69,7 +69,7 @@
 			</a>
 		</small>
 		<h2>Software Engineer - Evergreen, CO</h2>
-		<h3>Lng: {lng?.toFixed(4)} | Lat: {lat?.toFixed(4)} | Z: {zoom?.toFixed(2)}</h3>
+		<h3>Lng: {lng?.toFixed(2)} | Lat: {lat?.toFixed(2)} | Z: {zoom?.toFixed(1)}</h3>
 	</header>
 
 	<div class="map-wrap">
