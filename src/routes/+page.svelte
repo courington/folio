@@ -1,6 +1,7 @@
 <script lang="ts">
-	import welcome from '$lib/images/svelte-welcome.webp';
-	import welcome_fallback from '$lib/images/svelte-welcome.png';
+	import linkedinLogo from '$lib/images/linkedin.svg';
+	import githubLogo from '$lib/images/github.svg';
+
 	import { Map, Marker } from 'mapbox-gl';
 	import '../../node_modules/mapbox-gl/dist/mapbox-gl.css';
 	import { onMount, onDestroy } from 'svelte';
@@ -30,7 +31,6 @@
 		});
 
 		map.on('load', (event) => {
-			console.log('== evt', event);
 			const marker = new Marker()
 				.setLngLat([_lng, _lat])
 				.addTo(event.target);
@@ -60,8 +60,16 @@
 <section>
 	<header class="sidebar">
 		<h1>Chase Courington</h1>
+		<small>
+			<a href="https://www.linkedin.com/in/chasecourington/" title="Chase's LinkedIn">
+				<img src={linkedinLogo} alt="linkedin logo" height="15" width="15" />
+			</a>
+			<a href="https://github.com/courington/" title="Chase's Github">
+				<img src={githubLogo} alt="github logo" height="18" width="18" />
+			</a>
+		</small>
 		<h2>Software Engineer - Evergreen, CO</h2>
-		<h3>Longitude: {lng?.toFixed(4)} | Latitude: {lat?.toFixed(4)} | Zoom: {zoom?.toFixed(2)}</h3>
+		<h3>Lng: {lng?.toFixed(4)} | Lat: {lat?.toFixed(4)} | Z: {zoom?.toFixed(2)}</h3>
 	</header>
 
 	<div class="map-wrap">
@@ -74,6 +82,14 @@
 		font-family: var(--font-body);
 		font-size: 1.625rem;
 		font-weight: bold;
+		margin: .5rem 0;
+	}
+
+	small {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
 	}
 
 	h3 {
