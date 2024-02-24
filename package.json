@@ -21,6 +21,7 @@
 		"@sveltejs/adapter-auto": "^2.0.0",
 		"@sveltejs/adapter-static": "^2.0.3",
 		"@sveltejs/kit": "^1.20.4",
+		"@types/geojson": "^7946.0.14",
 		"@types/mapbox-gl": "^2.7.19",
 		"@typescript-eslint/eslint-plugin": "^5.45.0",
 		"@typescript-eslint/parser": "^5.45.0",
@@ -40,6 +41,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"geojson": "^0.5.0",
 		"mapbox-gl": "^3.0.1",
 		"svelte-spa-router": "^3.3.0"
 	}
