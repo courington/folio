@@ -2,18 +2,17 @@
 	import linkedinLogo from '$lib/images/linkedin.svg';
 	import githubLogo from '$lib/images/github.svg';
 
-	import mapboxgl, { Map, Popup, type MapEventType, } from 'mapbox-gl';
+	import mapboxgl, { Map, Popup, type MapEventType } from 'mapbox-gl';
 	import '../../node_modules/mapbox-gl/dist/mapbox-gl.css';
 	import { onMount, onDestroy } from 'svelte';
 	import type { FeatureCollection, Point } from 'geojson';
 
-	const accessToken = 'pk.eyJ1IjoiY2hhY28iLCJhIjoiY2xyYzl1MWZ1MHlnNTJrbGhyYTk3Z282YyJ9.oJgUelWpn0B4DY6sfNyY0Q';
+	const accessToken =
+		'pk.eyJ1IjoiY2hhY28iLCJhIjoiY2xyYzl1MWZ1MHlnNTJrbGhyYTk3Z282YyJ9.oJgUelWpn0B4DY6sfNyY0Q';
 
 	let map: Map | undefined;
 	let mapContainer: string | HTMLElement;
-	let lng: number,
-		lat: number,
-		zoom: number;
+	let lng: number, lat: number, zoom: number;
 
 	const _lng = -105.3254;
 	const _lat = 39.6319;
@@ -25,20 +24,20 @@
 	let contextPopup: mapboxgl.Popup;
 
 	const placesGeoJson: FeatureCollection = {
-		'type': 'FeatureCollection',
-		'features': [
+		type: 'FeatureCollection',
+		features: [
 			{
-				'type': 'Feature',
-				'properties': {
-					'description':
+				type: 'Feature',
+				properties: {
+					description:
 						'<strong>Home Office</strong><p><a href="https://en.wikipedia.org/wiki/Evergreen,_Colorado" target="_blank" title="Opens Wikipedia entry for Evergreen, CO">Evergreen, CO</a> is where I live, work, and play. Easy access to Denver, world class skiing, and all the outdoor activities steps from home.</p>',
-					'icon': 'castle',
+					icon: 'castle'
 				},
-				'geometry': {
-					'type': 'Point',
-					'coordinates': [-105.3254, 39.6319]
+				geometry: {
+					type: 'Point',
+					coordinates: [-105.3254, 39.6319]
 				}
-			},
+			}
 		]
 	};
 
@@ -50,45 +49,45 @@
 			accessToken: `${accessToken}`,
 			style: 'mapbox://styles/mapbox/streets-v12',
 			center: [initialState.lng, initialState.lat],
-			zoom: initialState.zoom,
+			zoom: initialState.zoom
 		});
 
 		map.on('load', (event) => {
 			if (!map) return;
 
 			// add the digital elevation model tiles
-            map.addSource('mapbox-dem', {
-                type: 'raster-dem',
-                url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
-                tileSize: 512,
-                maxzoom: 20
-            });
-            map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1 });
+			map.addSource('mapbox-dem', {
+				type: 'raster-dem',
+				url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+				tileSize: 512,
+				maxzoom: 20
+			});
+			map.setTerrain({ source: 'mapbox-dem', exaggeration: 1 });
 
 			map.addSource('places', {
-				'type': 'geojson',
-				'data': placesGeoJson,
+				type: 'geojson',
+				data: placesGeoJson
 			});
 			// Add a layer showing the places.
 			map.addLayer({
-				'id': 'places',
-				'type': 'symbol',
-				'source': 'places',
-				'layout': {
+				id: 'places',
+				type: 'symbol',
+				source: 'places',
+				layout: {
 					'icon-image': ['get', 'icon'],
 					'icon-size': 2,
 					// 'icon-halo-color': 'rgba(255, 100, 100, 1)',
 					'icon-allow-overlap': true
 				}
 			});
-			
+
 			// map.on('click', (e) => {
 			// 	handleMapClick(e);
 			// });
 
 			map.on('contextmenu', (event) => {
 				if (contextPopup) contextPopup.remove();
-				
+
 				const lngLat = event.lngLat;
 				const queryElev = map?.queryTerrainElevation(lngLat, { exaggerated: false });
 				const elevation = Math.floor((queryElev || 0) * 3.28084);
@@ -145,7 +144,7 @@
 	function updateData(map: Map) {
 		zoom = map.getZoom();
 		lng = map.getCenter().lng;
-		lat = map.getCenter().lat;	
+		lat = map.getCenter().lat;
 	}
 </script>
 
@@ -179,7 +178,7 @@
 		font-family: var(--font-body);
 		font-size: 1.625rem;
 		font-weight: bold;
-		margin: .5rem 0;
+		margin: 0.5rem 0;
 	}
 
 	small {

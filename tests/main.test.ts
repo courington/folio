@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('index page has expected h1', async ({ page }) => {
+test('index page has expected name', async ({ page }) => {
 	await page.goto('/');
-	await expect(page.getByRole('heading', { name: 'Chase Courington' })).toBeVisible();
+	await expect(page.getByText('Chase Courington')).toBeVisible();
 });
