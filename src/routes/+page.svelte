@@ -47,10 +47,14 @@
 		map = new Map({
 			container: mapContainer,
 			accessToken: `${accessToken}`,
-			style: 'mapbox://styles/mapbox/streets-v12',
+			style: 'mapbox://styles/mapbox/satellite-streets-v12',
 			center: [initialState.lng, initialState.lat],
+			pitch: 80,
+            bearing: 90,
 			zoom: initialState.zoom
 		});
+
+		map.addControl(new mapboxgl.NavigationControl(), "bottom-right");
 
 		map.on('load', (event) => {
 			if (!map) return;
