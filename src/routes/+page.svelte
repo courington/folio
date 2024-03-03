@@ -29,13 +29,14 @@
 			{
 				type: 'Feature',
 				properties: {
+					label: 'foobar',
 					description:
 						'<strong>Home Office</strong><p><a href="https://en.wikipedia.org/wiki/Evergreen,_Colorado" target="_blank" title="Opens Wikipedia entry for Evergreen, CO">Evergreen, CO</a> is where I live, work, and play. Easy access to Denver, world class skiing, and all the outdoor activities steps from home.</p>',
 					icon: 'castle'
 				},
 				geometry: {
 					type: 'Point',
-					coordinates: [-105.3254, 39.6319]
+					coordinates: [-105.30937400767814, 39.63247258123715]
 				}
 			}
 		]
@@ -49,7 +50,7 @@
 			accessToken: `${accessToken}`,
 			style: 'mapbox://styles/mapbox/satellite-streets-v12',
 			center: [initialState.lng, initialState.lat],
-			pitch: 80,
+			pitch: 70,
             bearing: 90,
 			zoom: initialState.zoom
 		});
@@ -98,7 +99,7 @@
 
 				contextPopup = new Popup()
 					.setLngLat(lngLat)
-					.setHTML(`${elevation}ft above sea level`)
+					.setHTML(`${lngLat} - ${elevation}ft above sea level`)
 					.addTo(event.target);
 			});
 
